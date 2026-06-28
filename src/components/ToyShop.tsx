@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { motion } from 'motion/react';
-import { ShoppingBag, Star, Check, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ShoppingBag, Star, Check, Sparkles, X } from 'lucide-react';
 import { ToyItem, UserStats } from '../types';
 
 interface ToyShopProps {
@@ -15,6 +15,8 @@ interface ToyShopProps {
 }
 
 export default function ToyShop({ stats, unlockToy, equipToy }: ToyShopProps) {
+  const [showErrorMsg, setShowErrorMsg] = useState<string | null>(null);
+
   const shopItems: ToyItem[] = [
     {
       id: 'hat_grad',
@@ -80,7 +82,7 @@ export default function ToyShop({ stats, unlockToy, equipToy }: ToyShopProps) {
         unlockToy(item.id, item.cost);
         equipToy(item.emoji); // Automatically equip on buy
       } else {
-        alert(`أوه يا بطل! أنت بحاجة إلى ${item.cost - stats.stars} نجمة إضافية لشراء هذا العنصر الرائع. استمر باللعب لجمع المزيد! ⭐`);
+        setShowErrorMsg(`أوه يا بطل! أنت بحاجة إلى ${item.cost - stats.stars} نجمة إضافية لشراء هذا العنصر الرائع. استمر باللعب لجمع المزيد! ⭐`);
       }
     }
   };
@@ -194,6 +196,52 @@ export default function ToyShop({ stats, unlockToy, equipToy }: ToyShopProps) {
           </p>
         </div>
       </div>
+
+      {/* Beautiful Kid-themed Alert Modal for insufficient stars */}
+      <AnimatePresence>
+        {showErrorMsg && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" id="shop-error-modal">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowErrorMsg(null)}
+              className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            />
+            
+            {/* Modal Content */}
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="bg-[#FFFDF4] rounded-[32px] border-4 border-[#FF8E3C] shadow-[0_10px_0_0_#CC7130] p-6 sm:p-8 max-w-sm w-full relative z-50 text-center"
+            >
+              <button
+                onClick={() => setShowErrorMsg(null)}
+                className="absolute top-4 left-4 p-1.5 rounded-full hover:bg-orange-50 transition text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 border-2 border-[#FF8E3C] animate-bounce">
+                ⭐
+              </div>
+              
+              <h3 className="text-lg sm:text-xl font-black text-gray-800 mb-6 leading-relaxed">
+                {showErrorMsg}
+              </h3>
+              
+              <button
+                onClick={() => setShowErrorMsg(null)}
+                className="w-full py-3 bg-[#FF8E3C] hover:bg-[#CC7130] text-white font-black text-sm rounded-2xl border-4 border-[#CC7130] shadow-[0_4px_0_0_#CC7130] hover:translate-y-[2px] hover:shadow-none transition cursor-pointer"
+              >
+                حسنًا، سأفعل! 👍
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export default function Companion({ stats, addStars }: CompanionProps) {
 
       window.speechSynthesis.speak(utterance);
     } else {
-      alert('نظام القراءة الصوتية غير مدعوم في هذا المتصفح');
+      console.warn('نظام القراءة الصوتية غير مدعوم في هذا المتصفح');
     }
   };
 

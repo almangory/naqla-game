@@ -40,22 +40,30 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const rect = containerRef.current.getBoundingClientRect();
+    const width = Math.max(rect.width || containerRef.current.clientWidth || 600, 300);
+
     // Temporary save content
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     const tempCtx = tempCanvas.getContext('2d');
-    if (tempCtx) {
+    if (tempCtx && canvas.width > 0 && canvas.height > 0) {
       tempCtx.drawImage(canvas, 0, 0);
     }
 
     // Set new size from parent
-    const rect = containerRef.current.getBoundingClientRect();
-    canvas.width = rect.width;
+    canvas.width = width;
     canvas.height = 420; // fixed height for better layout
 
-    // Re-draw saved content
-    ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+    // Fill with white first, then draw the temp content to keep white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Re-draw saved content if there was any
+    if (tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
+      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+    }
     
     // Set styles again
     ctx.lineCap = 'round';
@@ -64,8 +72,13 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
 
   useEffect(() => {
     resizeCanvas();
+    // A small timeout ensures layout is finished and we get the correct size
+    const timer = setTimeout(resizeCanvas, 100);
     window.addEventListener('resize', resizeCanvas);
-    return () => window.removeEventListener('resize', resizeCanvas);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', resizeCanvas);
+    };
   }, []);
 
   // Initialize canvas defaults on mount
