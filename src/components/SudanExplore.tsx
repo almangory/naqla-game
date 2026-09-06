@@ -45,13 +45,16 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
     return SUDAN_COMPREHENSIVE_ITEMS.filter(item => item.category === selectedCategory);
   }, [selectedCategory]);
 
+  // Helper to remove Arabic diacritics (Tashkeel) for flexible searching
+  const stripTashkeel = (s: string) => s.replace(/[\u064B-\u065F\u0670]/g, '');
+
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return categoryItems;
-    const q = searchQuery.toLowerCase().trim();
+    const q = stripTashkeel(searchQuery).toLowerCase().trim();
     return categoryItems.filter(item => 
-      item.name.toLowerCase().includes(q) || 
-      item.locationOrUsage.toLowerCase().includes(q) || 
-      item.summary.toLowerCase().includes(q)
+      stripTashkeel(item.name).toLowerCase().includes(q) || 
+      stripTashkeel(item.locationOrUsage).toLowerCase().includes(q) || 
+      stripTashkeel(item.summary).toLowerCase().includes(q)
     );
   }, [categoryItems, searchQuery]);
 

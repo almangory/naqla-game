@@ -47,130 +47,133 @@ export default function SudanDictionary({ addStars, onBackToMain }: SudanDiction
   const dictionaryItems: DictionaryItem[] = [
     {
       id: 'tebaldi',
-      arabic: 'شجرة التبلدي',
+      arabic: 'شَجَرَةُ التَّبَلْدِي (الْبَاوْبَاب)',
       english: 'Baobab Tree',
       phonetic: '/ˈbeɪoʊbæb triː/',
       category: 'nature',
       emoji: '🌳',
-      descriptionAr: 'شجرة ضخمة جداً ومشهورة في غرب السودان (كردفان)، تمتاز بجذعها العريض جداً الذي يخزن كميات هائلة من المياه العذبة طبيعياً لفصل الجفاف.',
+      descriptionAr: 'شَجَرَةٌ ضَخْمَةٌ جِدّاً وَمَشْهُورَةٌ فِي غَرْبِ السُّودَانِ (كُرْدُفَان)، تَمْتَازُ بِجِذْعِهَا الْعَرِيضِ جِدّاً الَّذِي يَخْزِنُ كَمِّيَّاتٍ هَائِلَةً مِنَ الْمِيَاهِ الْعَذْبَةِ طَبِيعِيّاً لِفَصْلِ الْجَفَاف.',
       descriptionEn: 'A massive, iconic tree in western Sudan (Kordofan) with a giant hollow trunk that stores fresh water naturally for the dry season.',
-      fact: 'هل تعلم أن شجرة التبلدي تسمى أيضاً "شجرة القارورة" وتعيش لآلاف السنين وتعتبر من أصدقاء الإنسان والحيوانات في الصحراء؟ 💧🐘'
+      fact: 'هَلْ تَعْلَمُ أَنَّ شَجَرَةَ التَّبَلْدِي تُسَمَّى أَيْضاً "شَجَرَةَ الْقَارُورَةِ" وَتَعِيشُ لِآلَافِ السِّنِينَ وَتُعْتَبَرُ مِنْ أَصْدِقَاءِ الْإِنْسَانِ وَالْحَيَوَانَاتِ فِي الصَّحْرَاء؟ 💧🐘'
     },
     {
       id: 'pyramids',
-      arabic: 'أهرامات مروي',
+      arabic: 'أَهْرَامَاتُ مَرَوِي (الْبَجْرَاوِيَّة)',
       english: 'Nubian Pyramids',
       phonetic: '/ˈnuːbiən ˈpɪrəmɪdz/',
       category: 'heritage',
       emoji: '⛰️',
-      descriptionAr: 'المدافن الملكية لملوك وملكات مملكة كوش العظيمة بالبجراوية، وهي أهرامات مدببة الشكل بنيت بأيدي أجدادنا الفراعنة السودانيين قبل آلاف السنين.',
+      descriptionAr: 'الْمَدَافِنُ الْمَلَكِيَّةُ لِمُلُوكِ وَمَلِكَاتِ مَمْلَكَةِ كُوشَ الْعَظِيمَةِ بِالْبَجْرَاوِيَّةِ، وَهِيَ أَهْرَامَاتٌ مُدَبَّبَةُ الشَّكْلِ بُنِيَتْ بِأَيْدِي أَجْدَادِنَا الْفَرَاعِنَةِ السُّودَانِيِّينَ قَبْلَ آلَافِ السِّنِين.',
       descriptionEn: 'The royal burial tombs of the kings and queens of the ancient Kushite Kingdom in Meroe, built with beautiful steep angles.',
-      fact: 'هل تعلم أن السودان يضم أكثر من 220 هرماً أثرياً، وهو أكبر عدد للأهرامات في بلد واحد على وجه الأرض! 🇸🇩✨'
+      fact: 'هَلْ تَعْلَمُ أَنَّ السُّودَانَ يَضُمُّ أَكْثَرَ مِنْ 220 هَرَماً أَثَرِيّاً، وَهُوَ أَكْبَرُ عَدَدٍ لِلْأَهْرَامَاتِ فِي بَلَدٍ وَاحِدٍ عَلَى وَجْهِ الْأَرْض! 🇸🇩✨'
     },
     {
       id: 'mogran',
-      arabic: 'مقرن النيلين',
+      arabic: 'مَقْرَنُ النِّيلَيْنِ',
       english: 'Nile Confluence',
       phonetic: '/naɪl ˈkɒnfluəns/',
       category: 'nature',
       emoji: '🌊',
-      descriptionAr: 'النقطة الساحرة في مدينة الخرطوم حيث يلتقي النيل الأزرق القوي القادم من إثيوبيا، بالنيل الأبيض الهادئ القادم من وسط إفريقيا، ليشكلان معاً نهر النيل.',
+      descriptionAr: 'النُّقْطَةُ السَّاحِرَةُ فِي مَدِينَةِ الْخَرْطُومِ حَيْثُ يَلْتَقِي النِّيلُ الْأَزْرَقُ الْقَوِيُّ الْقَادِمُ مِنْ إِثْيُوبْيَا، بِالنِّيلِ الْأَبْيَضِ الْهَادِئِ الْقَادِمِ مِنْ وَسَطِ إِفْرِيقْيَا، لِيُشَكِّلَا مَعاً نَهْرَ النِّيل.',
       descriptionEn: 'The beautiful meeting point of the powerful Blue Nile and the peaceful White Nile in Khartoum, merging to form the great River Nile.',
-      fact: 'هل تعلم أن مياه النيلين تجري متجاورة لمسافة قبل أن تختلط تماماً، مما يظهر بوضوح خطاً طبيعياً رائعاً يفصل بين اللون الطيني والأزرق الصافي! 💙🤍'
+      fact: 'هَلْ تَعْلَمُ أَنَّ مِيَاهَ النِّيلَيْنِ تَجْرِي مُتَجَاوِرَةً لِمَسَافَةٍ قَبْلَ أَنْ تَخْتَلِطَ تَمَاماً، مِمَّا يُظْهِرُ بِوُضُوحٍ خَطّاً طَبِيعِيّاً رَائِعاً يَفْصِلُ بَيْنَ اللَّوْنِ الطِّينِيِّ وَالْأَزْرَقِ الصَّافِي! 💙🤍'
     },
     {
       id: 'kisra',
-      arabic: 'الكسرة السودانية',
+      arabic: 'الْكِسْرَةُ السُّودَانِيَّةُ',
       english: 'Kisra Bread',
       phonetic: '/ˈkɪsrə brɛd/',
       category: 'food',
       emoji: '🫓',
-      descriptionAr: 'رقاق شهي ومخمر يُصنع بمهارة فائقة على صاج حديدي ساخن يسمى "الدوكة" باستخدام عجين الذرة، ويؤكل مع أنواع الملاح الشهية.',
+      descriptionAr: 'رُقَاقٌ شَهِيٌّ وَمُخَمَّرٌ يُصْنَعُ بِمَهَارَةٍ فَائِقَةٍ عَلَى صَاجٍ حَدِيدِيٍّ سَاخِنٍ يُسَمَّى "الدُّوكَةَ" بِاسْتِخْدَامِ عَجِينِ الذُّرَةِ، وَيُؤْكَلُ مَعَ أَنْوَاعِ الْمُلَاحِ الشَّهِيَّة.',
       descriptionEn: 'Thin, delicious fermented flatbread made from sorghum flour, baked expertly on a hot metal plate called "Dooka".',
-      fact: 'تعتبر الكسرة الطبق الشعبي الأسرع والأكثر مهارة في الطهي، حيث تفردها الأمهات في ثوانٍ معدودة باستخدام قطعة سعف صغيرة! 🌾🔥'
+      fact: 'تُعْتَبَرُ الْكِسْرَةُ الطَّبَقَ الشَّعْبِيَّ الْأَسْرَعَ وَالْأَكْثَرَ مَهَارَةً فِي الطَّهْيِ، حَيْثُ تَفْرِدُهَا الْأُمَّهَاتُ فِي ثَوَانٍ مَعْدُودَةٍ بِاسْتِخْدَامِ قِطْعَةِ سَعَفٍ صَغِيرَةٍ (الْقَرْقَرِيبَة)! 🌾🔥'
     },
     {
       id: 'camel',
-      arabic: 'الجمل البشاري',
+      arabic: 'الْجَمَلُ الْبِشَارِيُّ',
       english: 'Bishari Camel',
       phonetic: '/ˈbɪʃəri ˈkæməl/',
       category: 'nature',
       emoji: '🐪',
-      descriptionAr: 'حيوان قوي وصبور يعيش في شرق السودان، يتميز برشقته وسرعته العالية في السباقات وطيبته وصبره الطويل في الصحاري.',
+      descriptionAr: 'حَيَوَانٌ قَوِيٌّ وَصَبُورٌ يَعِيشُ فِي شَرْقِ السُّودَانِ، يَتَمَيَّزُ بِرَشَاقَتِهِ وَسُرْعَتِهِ الْعَالِيَةِ فِي السِّبَاقَاتِ وَطِيبَتِهِ وَصَبْرِهِ الطَّوِيلِ فِي الصَّحَارِي.',
       descriptionEn: 'A strong and graceful camel bred in eastern Sudan, famous for its speed, beauty, and incredible endurance in the desert.',
-      fact: 'تعتبر سباقات الهجن (الجمال) في شرق السودان وبطول ساحل البحر الأحمر من أجمل الفعاليات التراثية التي تجذب المتفرجين من كل مكان! 🏁🐪'
+      fact: 'تُعْتَبَرُ سِبَاقَاتُ الْهِجَانِ (الْجِمَالِ) فِي شَرْقِ السُّودَانِ وَبِطُولِ سَاحِلِ الْبَحْرِ الْأَحْمَرِ مِنْ أَجْمَلِ الْفَعَالِيَّاتِ التُّرَاثِيَّةِ الَّتِي تَجْذِبُ الْمُتَفَرِّجِينَ مِنْ كُلِّ مَكَان! 🏁🐪'
     },
     {
       id: 'doum',
-      arabic: 'نخلة الدوم',
+      arabic: 'نَخِيلُ الدَّوْمِ',
       english: 'Doum Palm',
       phonetic: '/duːm pɑːm/',
       category: 'nature',
       emoji: '🌴',
-      descriptionAr: 'نوع فريد من النخيل يتفرع جذعه إلى عدة فروع، ينمو بكثرة في غرب وشرق السودان، وثمرته صلبة وبنية ذات طعم حلو ومميز ومفيد جداً.',
+      descriptionAr: 'نَوْعٌ فَرِيدٌ مِنَ النَّخِيلِ يَتَفَرَّعُ جِذْعُهُ إِلَى عِدَّةِ فُرُوعٍ، يَنْمُو بِكَثْرَةٍ فِي غَرْبِ وَشَرْقِ السُّودَانِ، وَثَمَرَتُهُ صَلْبَةٌ وَبُنِّيَّةٌ ذَاتُ طَعْمٍ حُلْوٍ وَمُمَيَّزٍ وَمُفِيدٍ جِدّاً.',
       descriptionEn: 'A unique branching palm tree native to Sudan, producing hard, dark orange-brown sweet fruits with therapeutic health benefits.',
-      fact: 'هل تعلم أن أجدادنا النوبيين القدماء كانوا يقدسون شجرة الدوم، وتصنع من سعفها وسلالها الملونة أجمل التحف اليدوية التقليدية؟ 🧺✨'
+      fact: 'هَلْ تَعْلَمُ أَنَّ أَجْدَادَنَا النُّوبِيِّينَ الْقُدَمَاءَ كَانُوا يُقَدِّسُونَ شَجَرَةَ الدَّوْمِ، وَتُصْنَعُ مِنْ سَعَفِهَا وَسِلَالِهَا الْمُلَوَّنَةِ أَجْمَلُ التُّحَفِ الْيَدَوِيَّةِ التَّقْلِيدِيَّة؟ 🧺✨'
     },
     {
       id: 'zeer',
-      arabic: 'الزير الفخاري',
+      arabic: 'الزِّيرُ الْفَخَّارِيُّ',
       english: 'Clay Water Pot',
       phonetic: '/kleɪ ˈwɔːtər pɒt/',
       category: 'heritage',
       emoji: '🏺',
-      descriptionAr: 'وعاء كبير ومستدير مصنوع من الطين النيلي الفخاري، يوضع في مكان مظلل لتبريد مياه النيل طبيعياً وتنقيتها عبر مسامات الطين الصديقة للبيئة.',
+      descriptionAr: 'وِعَاءٌ كَبِيرٌ وَمُسْتَدِيرٌ مَصْنُوعٌ مِنَ الطِّينِ النِّيلِيِّ الْفَخَّارِيِّ، يُوضَعُ فِي مَكَانٍ مُظَلَّلٍ لِتَبْرِيدِ مِيَاهِ النِّيلِ طَبِيعِيّاً وَتَنْقِيَتِهَا عَبْرَ مَسَامَاتِ الطِّينِ الصَّدِيقَةِ لِلْبِيئَة.',
       descriptionEn: 'A large, porous clay vessel handmade of Nile clay, placed in shaded areas to naturally cool and filter drinking water.',
-      fact: 'الزير يمثل رمزاً للكرم في السودان، حيث تضعه البيوت في الشوارع ممتلئاً بالماء البارد واللذيذ ليرتوي منه كل عابر سبيل مجاناً! 🏺💧'
+      fact: 'الزِّيرُ يُمَثِّلُ رَمْزاً لِلْكَرَمِ فِي السُّودَانِ، حَيْثُ تَضَعُهُ الْبُيُوتُ فِي الشَّوَارِعِ مُمْتَلِئاً بِالْمَاءِ الْبَارِدِ وَاللَّذِيذِ لِيَرْتَوِيَ مِنْهُ كُلُّ عَابِرِ سَبِيلٍ مَجَّاناً! 🏺💧'
     },
     {
       id: 'angareb',
-      arabic: 'العنقريب الأصيل',
+      arabic: 'الْعَنْقَرِيبُ الْأَصِيلُ',
       english: 'Angareb Bed',
       phonetic: '/ˈæŋɡərɛb bɛd/',
       category: 'heritage',
       emoji: '🪵',
-      descriptionAr: 'سرير خشبي تقليدي متين يُصنع من فروع الأشجار القوية، ويُنسج وسطه بمهارة فائقة باستخدام حبال السعف أو خيوط الجلد الطبيعي المريحة.',
+      descriptionAr: 'سَرِيرٌ خَشَبِيٌّ تَقْلِيدِيٌّ مَتِينٌ يُصْنَعُ مِنْ فُرُوعِ الْأَشْجَارِ الْقَوِيَّةِ، وَيُنْسَجُ وَسَطُهُ بِمَهَارَةٍ فَائِقَةٍ بِاسْتِخْدَامِ حِبَالِ السَّعَفِ أَوْ خُيُوطِ الْجِلْدِ الطَّبِيعِيِّ الْمُرِيحَة.',
       descriptionEn: 'A traditional Sudanese bed crafted from strong wood and woven with rope or natural leather, offering comfortable cool air flow.',
-      fact: 'العنقريب صديق الصيف السوداني! بفضل فتحاته الصغيرة المنسوجة، يوفر تهوية باردة مذهلة أثناء النوم تحت النجوم في الساحة! ✨🌌'
+      fact: 'الْعَنْقَرِيبُ صَدِيقُ الصَّيْفِ السُّودَانِيِّ! بِفَضْلِ فَتَحَاتِهِ الصَّغِيرَةِ الْمَنْسُوجَةِ، يُوَفِّرُ تَهْوِيَةً بَارِدَةً مُذْهِلَةً أَثْنَاءَ النَّوْمِ تَحْتَ النُّجُومِ فِي السَّاحَة! ✨🌌'
     },
     {
       id: 'qumriya',
-      arabic: 'طائر القمري',
+      arabic: 'طَائِرُ الْقُمْرِيِّ السُّودَانِيُّ',
       english: 'Turtle Dove',
       phonetic: '/ˈtɜːrtl dʌv/',
       category: 'nature',
       emoji: '🕊️',
-      descriptionAr: 'طائر بري لطيف يملأ الصباح الباكر في قرى ومدن السودان بألحان وتغريدات هادئة تريح النفوس وتغنى بها الشعراء في السودان.',
+      descriptionAr: 'طَائِرٌ بَرِّيٌّ لَطِيفٌ يَمْلَأُ الصَّبَاحَ الْبَاكِرَ فِي قُرَى وَمُدُنِ السُّودَانِ بِأَلْحَانٍ وَتَغْرِيدَاتٍ هَادِئَةٍ تُرِيحُ النُّفُوسَ وَتَغَنَّى بِهَا الشُّعَرَاءُ فِي السُّودَان.',
       descriptionEn: 'A sweet wild dove that fills Sudanese mornings with soft, melodic cooing sounds, celebrated as a symbol of peace and home.',
-      fact: 'طائر القمري يحب شرب مياه النيل العذبة، ويبني أعشاشه البسيطة فوق أغصان أشجار النيم والسيال الظليلة ليرعى صغاره بأمان! 🕊️🌳'
+      fact: 'طَائِرُ الْقُمْرِيِّ يُحِبُّ شُرْبَ مِيَاهِ النِّيلِ الْعَذْبَةِ، وَيَبْنِي أَعْشَاشَهُ الْبَسِيطَةَ فَوْقَ أَغْصَانِ أَشْجَارِ النِّيمِ وَالسَّيَّالِ الظَّلِيلَةِ لِيَرْعَى صِغَارَهُ بِأَمَان! 🕊️🌳'
     },
     {
       id: 'asida',
-      arabic: 'العصيدة السودانية',
+      arabic: 'الْعَصِيدَةُ السُّودَانِيَّةُ',
       english: 'Asida Porridge',
       phonetic: '/əˈsiːdə ˈpɒrɪdʒ/',
       category: 'food',
       emoji: '🥣',
-      descriptionAr: 'طبق تقليدي ساخن ومغذي جداً يصنع من دقيق الذرة أو الدخن، يقدم مع "ملاح الويكة" أو اللحم المجفف المفروم في الصباح والأعياد.',
+      descriptionAr: 'طَبَقٌ تَقْلِيدِيٌّ سَاخِنٌ وَمُغَذٍّ جِدّاً يُصْنَعُ مِنْ دَقِيقِ الذُّرَةِ أَوِ الدُّخْنِ، يُقَدَّمُ مَعَ "مُلَاحِ الْوَيْكَةِ" أَوِ التَّقْلِيَةِ وَاللَّحْمِ الْمُجَفَّفِ فِي الصَّبَاحِ وَالْأَعْيَاد.',
       descriptionEn: 'A thick, traditional porridge made from sorghum or millet flour, served with savory dried okra stew or minced meat broth.',
-      fact: 'العصيدة هي الطبق السحري الذي يجمع الصائمين في السودان في مائدة إفطار رمضان في الشارع كصورة للتضامن والترابط الاجتماعي البديع! 🥣🌙'
+      fact: 'الْعَصِيدَةُ هِيَ الطَّبَقُ السِّحْرِيُّ الَّذِي يَجْمَعُ الصَّائِمِينَ فِي السُّودَانِ فِي مَائِدَةِ إِفْطَارِ رَمَضَانَ فِي الشَّارِعِ كَصُورَةٍ لِلتَّضَامُنِ وَالتَّرَابُطِ الِاجْتِمَاعِيِّ الْبَدِيع! 🥣🌙'
     },
     {
       id: 'jabana',
-      arabic: 'الجبنة الفخارية',
+      arabic: 'الْجَبَنَةُ الْفَخَّارِيَّةُ',
       english: 'Clay Coffee Pot',
       phonetic: '/kleɪ ˈkɒfi pɒt/',
       category: 'heritage',
       emoji: '☕',
-      descriptionAr: 'وعاء طيني فخاري سوداني كروي ذو عنق رفيع مزين، يُغلى فيه البن الطازج مع الزنجبيل الحار والهيل على الجمر ليفوح عبق الكرم.',
+      descriptionAr: 'وِعَاءٌ طِينِيٌّ فَخَّارِيٌّ سُودَانِيٌّ كُرَوِيٌّ ذُو عُنُقٍ رَفِيعٍ مُزَيَّنٍ، يُغْلَى فِيهِ الْبُنُّ الطَّازَجُ مَعَ الزَّنْجَبِيلِ الْحَارِّ وَالْهَيْلِ عَلَى الْجَمْرِ لِيَفُوحَ عَبَقُ الْكَرَم.',
       descriptionEn: 'A beautifully adorned clay pot used to brew authentic Sudanese coffee with spicy ginger and aromatic cardamom on coal.',
-      fact: 'عند تقديم قهوة الجبنة في البيوت السودانية، يُشعل اللبان (البخور) وتوزع الفشار والتمر لتكتمل الونسة والبهجة والترحيب بالضيوف! ☕🕯️'
+      fact: 'عِنْدَ تَقْدِيمِ قَهْوَةِ الْجَبَنَةِ فِي الْبُيُوتِ السُّودَانِيَّةِ، يُشْعَلُ اللُّبَانُ (الْبَخُورُ) وَتُوَزَّعُ الذُّرَةُ الْمُحَمَّصَةُ وَالتَّمْرُ لِتَكْتَمِلَ الْوَنَسَةُ وَالْبَهْجَةُ وَالتَّرْحِيبُ بِالضُّيُوف! ☕🕯️'
     }
   ];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'all' | 'nature' | 'heritage' | 'food'>('all');
   const [selectedItem, setSelectedItem] = useState<DictionaryItem | null>(dictionaryItems[0]);
+
+  // Strip tashkeel helper for resilient search matching
+  const stripTashkeel = (text: string) => text.replace(/[\u064B-\u065F\u0670]/g, '');
 
   // Quiz States (Interactive game)
   const [quizMode, setQuizMode] = useState(false);
@@ -187,10 +190,11 @@ export default function SudanDictionary({ addStars, onBackToMain }: SudanDiction
   };
 
   const filteredItems = dictionaryItems.filter(item => {
+    const cleanSearch = stripTashkeel(searchQuery.trim().toLowerCase());
     const matchesSearch = 
-      item.arabic.includes(searchQuery) || 
-      item.english.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.descriptionAr.includes(searchQuery);
+      stripTashkeel(item.arabic).toLowerCase().includes(cleanSearch) || 
+      item.english.toLowerCase().includes(cleanSearch) || 
+      stripTashkeel(item.descriptionAr).toLowerCase().includes(cleanSearch);
     
     const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
     
