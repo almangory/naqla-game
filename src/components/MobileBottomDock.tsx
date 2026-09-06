@@ -30,46 +30,46 @@ export const MobileBottomDock: React.FC<MobileBottomDockProps> = ({
       id: 'home',
       label: 'الرئيسية',
       icon: <Home className="w-5 h-5" />,
-      activeColor: 'bg-[#FF6B6B] text-white',
-      shadowColor: 'shadow-[0_4px_12px_rgba(255,107,107,0.4)]'
+      activeColor: 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white',
+      shadowColor: 'shadow-[0_4px_14px_rgba(108,92,231,0.4)]'
     },
     {
       id: 'games',
-      label: 'الألعاب',
+      label: '100 لعبة',
       icon: <Gamepad2 className="w-5 h-5" />,
-      activeColor: 'bg-[#4ECDC4] text-white',
-      shadowColor: 'shadow-[0_4px_12px_rgba(78,205,196,0.4)]'
+      activeColor: 'bg-gradient-to-tr from-cyan-500 to-blue-600 text-white',
+      shadowColor: 'shadow-[0_4px_14px_rgba(6,182,212,0.4)]'
     },
     {
       id: 'sudan',
       label: 'كوش 🇸🇩',
       icon: <Landmark className="w-5 h-5" />,
-      activeColor: 'bg-[#FF8E3C] text-white',
-      shadowColor: 'shadow-[0_4px_12px_rgba(255,142,60,0.4)]'
+      activeColor: 'bg-gradient-to-tr from-amber-500 to-orange-500 text-white',
+      shadowColor: 'shadow-[0_4px_14px_rgba(245,158,11,0.4)]'
     },
     {
       id: 'rewards',
       label: 'أوسمتي',
       icon: <Trophy className="w-5 h-5" />,
-      activeColor: 'bg-[#FFD93D] text-gray-900',
-      shadowColor: 'shadow-[0_4px_12px_rgba(255,217,61,0.4)]'
+      activeColor: 'bg-gradient-to-tr from-emerald-500 to-teal-600 text-white',
+      shadowColor: 'shadow-[0_4px_14px_rgba(16,185,129,0.4)]'
     },
     {
       id: 'settings',
-      label: 'غرفتي',
+      label: 'ثيمي 🎨',
       icon: <Palette className="w-5 h-5" />,
-      activeColor: 'bg-[#6C5CE7] text-white',
-      shadowColor: 'shadow-[0_4px_12px_rgba(108,92,231,0.4)]'
+      activeColor: 'bg-gradient-to-tr from-rose-500 to-pink-600 text-white',
+      shadowColor: 'shadow-[0_4px_14px_rgba(244,63,94,0.4)]'
     }
   ];
 
   return (
     <nav 
-      className="fixed bottom-2.5 inset-x-3 sm:inset-x-6 z-40 max-w-md mx-auto" 
+      className="fixed bottom-3 inset-x-3 sm:inset-x-6 z-40 max-w-md mx-auto" 
       dir="rtl"
       aria-label="شريط التنقل السفلي للجوال"
     >
-      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] border-2 border-amber-200/80 p-1.5 shadow-[0_12px_36px_rgba(0,0,0,0.14)] flex items-center justify-between safe-bottom-dock">
+      <div className="clay-pill bg-white/92 backdrop-blur-2xl p-1.5 shadow-[0_12px_36px_rgba(108,92,231,0.2)] border-2 border-white/90 flex items-center justify-between safe-bottom-dock">
         {dockItems.map((item) => {
           const isActive = activeNav === item.id;
           return (

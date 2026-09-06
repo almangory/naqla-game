@@ -106,6 +106,23 @@ export default function App() {
   const [mobileNavSection, setMobileNavSection] = useState<MobileNavSection>('home');
   const [activeFilter, setActiveFilter] = useState<'all' | 'sudan' | 'science' | 'languages' | 'arts' | 'brain'>('all');
 
+  // Screen size detection for automatic mobile responsive parallel layout
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Device Simulator Mode: Toggle between Native Mobile Experience and Desktop Bento Grid
   const [isMobileSimulator, setIsMobileSimulator] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -115,6 +132,9 @@ export default function App() {
     }
     return false;
   });
+
+  // Effective mobile layout active when on mobile screen or manually simulated
+  const isMobileEffective = isMobileScreen || isMobileSimulator;
 
   const [isVisualFullscreen, setIsVisualFullscreen] = useState(false);
 
@@ -639,14 +659,14 @@ export default function App() {
                 playClick();
               }}
               className={`clay-pill px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                isMobileSimulator 
+                isMobileEffective 
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-transparent shadow-[0_4px_14px_rgba(108,92,231,0.35)]' 
                   : 'text-[#26214B] hover:bg-white'
               }`}
               title="تبديل طريقة العرض: نمط الجوال الفائق أو النمط المكتبي"
               id="device-mode-toggle-btn"
             >
-              {isMobileSimulator ? (
+              {isMobileEffective ? (
                 <>
                   <Smartphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
                   <span className="hidden xs:inline">نمط الجوال 📱</span>
@@ -714,7 +734,7 @@ export default function App() {
             <div 
               className="relative cursor-pointer select-none group"
               onClick={() => {
-                if (isMobileSimulator) setMobileNavSection('rewards');
+                if (isMobileEffective) setMobileNavSection('rewards');
                 else setActiveTab('rewards');
                 playClick();
               }}
@@ -857,13 +877,13 @@ export default function App() {
         ) : (
           /* HOME PORTAL: EITHER MOBILE APP EXPERIENCE OR DESKTOP BENTO GRID */
           <>
-            {isMobileSimulator ? (
+            {isMobileEffective ? (
               /* ========================================================================= */
-              /* A) NATIVE MOBILE APP EXPERIENCE (تصميم موازي يتناسب مع الجوال تماماً)    */
+              /* A) NATIVE PARALLEL MOBILE APP EXPERIENCE (تصميم موازي متكامل للجوال)      */
               /* ========================================================================= */
-              <div className="w-full max-w-md mx-auto p-3 sm:p-4 flex-1 flex flex-col pb-28 animate-fade-in" id="mobile-app-container">
+              <div className="w-full max-w-lg mx-auto p-3 sm:p-4 flex-1 flex flex-col pb-28 animate-fade-in space-y-4" id="mobile-app-container">
                 
-                {/* Mobile Stories Bar (Instagram/Kids App Style) */}
+                {/* 1. Mobile Stories Bar (Kids App Quick Launch 3D Circles) */}
                 <MobileStoriesBar 
                   onSelectGame={(gameId) => {
                     setActiveTab(gameId);
@@ -872,98 +892,207 @@ export default function App() {
                   playClickSound={playClick}
                 />
 
-                {/* Sub-section Views based on Mobile Bottom Dock Selection */}
+                {/* 2. Sub-section Views based on Mobile Bottom Dock Selection */}
                 {mobileNavSection === 'home' && (
                   <div className="space-y-4">
-                    {/* 🌟 100 Games Academy Mobile Launcher Card */}
-                    <motion.button
-                      onClick={() => {
-                        setActiveTab('games_100_hub');
-                        playStarSound();
-                      }}
-                      whileTap={{ scale: 0.96 }}
-                      className="w-full p-4 rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white border-3 border-amber-300 shadow-[0_6px_0_0_#C2410C] flex items-center justify-between text-right cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl select-none animate-bounce">🌟</span>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="text-sm font-black">أكاديمية الـ 100 لعبة</h4>
-                            <span className="bg-yellow-300 text-yellow-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">
-                              موسوعة كاملة 🔥
-                            </span>
-                          </div>
-                          <p className="text-[10px] font-bold text-white/90 line-clamp-1 mt-0.5">
-                            قطار الحروف، سباق السيارات، العلوم، البرمجة، وكوش!
-                          </p>
-                        </div>
+                    
+                    {/* 3D Hero Emblem & Academy Master Ribbon Card */}
+                    <div className="clay-card rounded-[32px] p-4 text-center relative overflow-hidden">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="clay-pill px-3 py-0.5 text-[10px] font-black text-amber-900 border-amber-200 shadow-xs">
+                          🌟 أكاديمية الـ 100 لعبة
+                        </span>
+                        <span className="clay-pill px-2.5 py-0.5 text-[10px] font-black text-indigo-900 border-indigo-200">
+                          100 / 100 جاهزة
+                        </span>
                       </div>
-                      <div className="px-3 py-1.5 bg-white text-orange-600 font-black text-xs rounded-xl shadow-xs shrink-0">
-                        استكشف 🚀
-                      </div>
-                    </motion.button>
 
-                    {/* Quick Access Featured Games */}
+                      <div 
+                        onClick={() => {
+                          setActiveTab('games_100_hub');
+                          playStarSound();
+                        }}
+                        className="py-1 cursor-pointer group flex flex-col items-center justify-center active:scale-98 transition-transform"
+                      >
+                        <div className="w-44 h-22 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                          <img 
+                            src="/naqla-games-logo.jpg" 
+                            alt="NAQLA 3D Emblem" 
+                            className="max-h-full object-contain drop-shadow-[0_8px_16px_rgba(108,92,231,0.25)]" 
+                          />
+                        </div>
+                        <h2 className="text-base sm:text-lg font-black text-[#26214B] mt-1">
+                          منصة ألعاب نقلة التفاعلية 🎮
+                        </h2>
+                        <p className="text-[11px] font-bold text-[#635B9F] line-clamp-1 mt-0.5">
+                          منهاج الأبطال: قطار الحروف، سباق السيارات، العلوم، وكوش!
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setActiveTab('games_100_hub');
+                            playStarSound();
+                          }}
+                          className="clay-btn-coral flex-1 py-2.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95"
+                        >
+                          <span>استكشف موسوعة الـ 100 لعبة 🚀</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Mini Bento Row: Level Progress & Live Theme Swatches */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {/* Level Progress */}
+                      <div className="clay-card rounded-[24px] p-3 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-[#26214B]">المستوى {stats.level}</span>
+                          <span className="text-sm">👦⭐</span>
+                        </div>
+                        <div className="w-full h-3.5 bg-white/80 rounded-full overflow-hidden border border-white mt-1.5 p-0.5">
+                          <div 
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-500" 
+                            style={{ width: `${Math.max(15, (stats.stars % 50) * 2)}%` }}
+                          />
+                        </div>
+                        <span className="text-[9px] font-bold text-[#635B9F] mt-1">
+                          {(stats.stars % 50) * 2}% نحو المستوى {stats.level + 1}
+                        </span>
+                      </div>
+
+                      {/* Quick Theme Swatches */}
+                      <div className="clay-card rounded-[24px] p-3 flex flex-col justify-between">
+                        <span className="text-xs font-black text-[#26214B] flex items-center gap-1">
+                          <span>🎨</span>
+                          <span>ثيم المنصة:</span>
+                        </span>
+                        <div className="flex items-center justify-between gap-1 mt-1.5">
+                          {BG_COLORS.map(c => (
+                            <button
+                              key={c.id}
+                              onClick={() => {
+                                setBgColor(c.id);
+                                playClick();
+                              }}
+                              className={`w-5 h-5 rounded-full border-2 transition-transform cursor-pointer shrink-0 ${
+                                bgColor === c.id ? 'border-purple-600 scale-125 shadow-xs' : 'border-white'
+                              }`}
+                              style={{ backgroundColor: c.value }}
+                              title={c.name}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9px] font-bold text-[#635B9F] mt-1 truncate">
+                          {BG_COLORS.find(c => c.id === bgColor)?.name}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Swipeable Category Chips */}
                     <div>
-                      <div className="flex items-center justify-between px-1 mb-2.5">
-                        <h3 className="text-sm font-black text-gray-800 flex items-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-amber-500" />
-                          <span>ألعاب مميزة للأبطال:</span>
+                      <div className="flex items-center justify-between px-1 mb-2">
+                        <h3 className="text-xs sm:text-sm font-black text-[#26214B] flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          <span>اختر مغامرتك وابدأ:</span>
                         </h3>
                         <button
                           onClick={() => setMobileNavSection('games')}
-                          className="text-xs font-black text-[#FF8E3C] hover:underline cursor-pointer"
+                          className="text-xs font-black text-purple-700 hover:underline cursor-pointer"
                         >
-                          عرض الكل ({menuItems.length - 1}) 👈
+                          كل الألعاب ({menuItems.length - 1}) 👈
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        {menuItems.filter(i => i.id === 'pyramid_stacker' || i.id === 'sudan_rhythm' || i.id === 'math' || i.id === 'science').map((item) => (
-                          <motion.button
-                            key={item.id}
+                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                        {[
+                          { id: 'all', label: '🌟 الكل' },
+                          { id: 'sudan', label: '🇸🇩 كوش' },
+                          { id: 'science', label: '🧪 علوم' },
+                          { id: 'languages', label: '📚 لغات' },
+                          { id: 'arts', label: '🎨 فنون' },
+                          { id: 'brain', label: '🦉 ذكاء' }
+                        ].map(tab => (
+                          <button
+                            key={tab.id}
                             onClick={() => {
-                              setActiveTab(item.id as any);
-                              playStarSound();
+                              setActiveFilter(tab.id as any);
+                              playClick();
                             }}
-                            whileTap={{ scale: 0.94 }}
-                            className={`p-3.5 rounded-3xl border-3 bg-white text-right flex flex-col justify-between h-[150px] shadow-[0_6px_0_0_#E0E0E0] cursor-pointer transition-all ${item.borderColor}`}
+                            className={`clay-pill px-3 py-1.5 text-xs font-black shrink-0 transition-all cursor-pointer ${
+                              activeFilter === tab.id 
+                                ? 'clay-pill-active scale-105' 
+                                : 'text-[#26214B] hover:bg-white'
+                            }`}
                           >
-                            <div className="flex items-start justify-between">
-                              <span className="text-3xl select-none">{item.label.split(' ')[0]}</span>
-                              <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full">
-                                {item.badge}
-                              </span>
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-black text-gray-800 line-clamp-1">
-                                {item.label.substring(item.label.indexOf(' ') + 1)}
-                              </h4>
-                              <p className="text-[10px] font-bold text-gray-500 line-clamp-2 mt-1 leading-snug">
-                                {item.desc}
-                              </p>
-                            </div>
-                          </motion.button>
+                            {tab.label}
+                          </button>
                         ))}
                       </div>
                     </div>
 
-                    {/* Daily Wisdom / Mascot Cheer Card */}
-                    <div className="bg-gradient-to-r from-amber-100 to-yellow-200 border-3 border-[#FFD93D] p-3.5 rounded-3xl flex items-center gap-3 shadow-xs">
-                      <div className="text-3xl select-none animate-bounce">🦉✨</div>
+                    {/* 2-Column Mobile Tactile Games Grid */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {filteredMenuItems.map(item => (
+                        <motion.button
+                          key={item.id}
+                          onClick={() => {
+                            setActiveTab(item.id as any);
+                            playStarSound();
+                          }}
+                          whileTap={{ scale: 0.94 }}
+                          className="clay-card p-3 rounded-[26px] text-right flex flex-col justify-between h-[155px] cursor-pointer transition-all active:scale-95 hover:shadow-[0_12px_24px_rgba(108,92,231,0.15)]"
+                          id={`mobile-card-${item.id}`}
+                        >
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <span className="text-3xl select-none">{item.label.split(' ')[0]}</span>
+                              <span className="clay-pill px-2 py-0.5 text-indigo-950 text-[9px] font-black border-indigo-100">
+                                {item.badge}
+                              </span>
+                            </div>
+                            <h4 className="text-xs font-black text-[#26214B] line-clamp-1 mt-2">
+                              {item.label.substring(item.label.indexOf(' ') + 1)}
+                            </h4>
+                            <p className="text-[10px] font-bold text-[#635B9F] line-clamp-2 mt-0.5 leading-snug">
+                              {item.desc}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between border-t border-white/60 pt-2 mt-1">
+                            <span className="text-[10px] font-black text-teal-700 flex items-center gap-0.5">
+                              <span>العب</span>
+                              <span>👈</span>
+                            </span>
+                            <span className="clay-pill px-1.5 py-0.2 text-[9px] font-black text-amber-700">⭐ +10</span>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* Daily Wisdom Mascot Card */}
+                    <div className="clay-card rounded-[28px] p-4 flex items-center gap-3">
+                      <div className="text-3xl select-none animate-bounce shrink-0">🦉✨</div>
                       <div className="text-right">
-                        <h4 className="text-xs font-black text-gray-900">نصيحة سمسم اليومية:</h4>
-                        <p className="text-[11px] font-bold text-amber-950 leading-tight mt-0.5">
-                          "كل مسألة تحلها وكل هرم تبنيه يجعلك أذكى بطل في السودان! استمر في الإبداع!"
+                        <h4 className="text-xs font-black text-[#26214B]">نصيحة سمسم اليومية:</h4>
+                        <p className="text-[11px] font-bold text-[#635B9F] leading-snug mt-0.5">
+                          "كل لغز تحله وكل مسألة تركبها تقودك لتكون بطل المستقبل! انطلق واصنع الإنجاز!"
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
+                {/* Sub-section: 100 Games Catalog (mobileNavSection === 'games') */}
                 {mobileNavSection === 'games' && (
                   <div className="space-y-3">
-                    <div className="bg-white p-3 rounded-2xl border-2 border-amber-200 shadow-xs">
+                    <div className="clay-card rounded-[28px] p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-[#26214B]">موسوعة الألعاب الكاملة 🌟</span>
+                        <span className="clay-pill px-2.5 py-0.5 text-[10px] font-black text-purple-900 border-purple-200">
+                          100 لعبة
+                        </span>
+                      </div>
+                      {/* Filter chips */}
                       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                         {[
                           { id: 'all', label: '🌟 الكل' },
@@ -979,10 +1108,10 @@ export default function App() {
                               setActiveFilter(filter.id as any);
                               playClick();
                             }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition cursor-pointer ${
+                            className={`clay-pill px-3 py-1 text-xs font-black shrink-0 transition-all cursor-pointer ${
                               activeFilter === filter.id 
-                                ? 'bg-[#FF8E3C] text-white shadow-xs' 
-                                : 'bg-gray-100 text-gray-700'
+                                ? 'clay-pill-active scale-105' 
+                                : 'text-gray-700 hover:bg-white'
                             }`}
                           >
                             {filter.label}
@@ -991,6 +1120,7 @@ export default function App() {
                       </div>
                     </div>
 
+                    {/* 1-column responsive game list */}
                     <div className="grid grid-cols-1 gap-2.5">
                       {filteredMenuItems.map((item) => (
                         <motion.button
@@ -1000,27 +1130,27 @@ export default function App() {
                             playStarSound();
                           }}
                           whileTap={{ scale: 0.96 }}
-                          className={`p-3.5 rounded-2xl border-3 bg-white flex items-center justify-between text-right shadow-[0_4px_0_0_#E0E0E0] cursor-pointer ${item.borderColor}`}
+                          className="clay-card p-3.5 rounded-[24px] flex items-center justify-between text-right cursor-pointer"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-3xl select-none">{item.label.split(' ')[0]}</span>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <h4 className="text-xs font-black text-gray-800">
+                                <h4 className="text-xs font-black text-[#26214B]">
                                   {item.label.substring(item.label.indexOf(' ') + 1)}
                                 </h4>
                                 {item.isNew && (
-                                  <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">
+                                  <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full shadow-xs">
                                     جديد 🔥
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] font-bold text-gray-500 line-clamp-1 mt-0.5">
+                              <p className="text-[10px] font-bold text-[#635B9F] line-clamp-1 mt-0.5">
                                 {item.desc}
                               </p>
                             </div>
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center text-xs font-black shrink-0">
+                          <div className="w-8 h-8 rounded-xl bg-purple-100/80 text-purple-900 flex items-center justify-center text-xs font-black shrink-0 border border-purple-200">
                             <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </div>
                         </motion.button>
@@ -1029,13 +1159,14 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Sub-section: Sudan Heritage (mobileNavSection === 'sudan') */}
                 {mobileNavSection === 'sudan' && (
                   <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-[#FF8E3C] to-[#E28743] text-white p-4 rounded-3xl border-3 border-white shadow-md text-center">
+                    <div className="clay-card rounded-[32px] p-5 text-center relative overflow-hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white border-white/80 shadow-md">
                       <span className="text-4xl">🇸🇩👑</span>
                       <h3 className="text-lg font-black mt-1">واحة أمجاد وتراث السودان</h3>
                       <p className="text-xs font-bold text-white/90 mt-1">
-                        ألعاب ممتعة مخصصة لتعريف أطفالنا بحضارة كوش والتراث السوداني الأصيل
+                        ألعاب تفاعلية ممتعة تعرّف أبطالنا بحضارة كوش والتراث السوداني الأصيل
                       </p>
                     </div>
 
@@ -1048,20 +1179,20 @@ export default function App() {
                             playStarSound();
                           }}
                           whileTap={{ scale: 0.95 }}
-                          className={`p-4 rounded-3xl border-3 bg-white text-right shadow-[0_6px_0_0_#D1D1D1] flex items-center justify-between cursor-pointer ${item.borderColor}`}
+                          className="clay-card p-4 rounded-[28px] text-right flex items-center justify-between cursor-pointer"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-4xl select-none">{item.label.split(' ')[0]}</span>
                             <div>
-                              <h4 className="text-sm font-black text-gray-800">
+                              <h4 className="text-sm font-black text-[#26214B]">
                                 {item.label.substring(item.label.indexOf(' ') + 1)}
                               </h4>
-                              <p className="text-xs font-bold text-gray-500 mt-0.5 line-clamp-2">
+                              <p className="text-xs font-bold text-[#635B9F] mt-0.5 line-clamp-2">
                                 {item.desc}
                               </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1.5 bg-[#FF8E3C] text-white text-xs font-black rounded-xl shadow-xs shrink-0">
+                          <div className="clay-btn-coral px-3.5 py-1.5 text-xs font-black rounded-xl shadow-xs shrink-0">
                             العب 🚀
                           </div>
                         </motion.button>
@@ -1070,24 +1201,25 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Sub-section: Rewards (mobileNavSection === 'rewards') */}
                 {mobileNavSection === 'rewards' && (
                   <div className="space-y-4">
-                    <div className="bg-white p-4 rounded-3xl border-3 border-[#FFD93D] shadow-[0_6px_0_0_#D1B02B] text-center">
-                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-2 border-2 border-amber-300">
+                    <div className="clay-card rounded-[32px] p-5 text-center">
+                      <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-2 border-2 border-white shadow-md">
                         🏆
                       </div>
-                      <h3 className="text-base font-black text-gray-800">أوسمة البطل الذكي</h3>
-                      <p className="text-xs font-bold text-gray-500 mt-1">
+                      <h3 className="text-base font-black text-[#26214B]">أوسمة البطل الذكي</h3>
+                      <p className="text-xs font-bold text-[#635B9F] mt-1">
                         كسبت {stats.stars} نجمة ووصلت للمستوى {stats.level}!
                       </p>
                       
-                      <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200 mt-3">
+                      <div className="w-full h-5 bg-white/70 rounded-full overflow-hidden border border-white mt-3 p-0.5">
                         <div 
-                          className="bg-[#FF8E3C] h-full rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-500"
                           style={{ width: `${(stats.stars % 50) * 2}%` }}
                         />
                       </div>
-                      <span className="text-[10px] font-black text-gray-600 mt-1 block">
+                      <span className="text-[10px] font-black text-[#635B9F] mt-1 block">
                         {(stats.stars % 50) * 2}% نحو المستوى {stats.level + 1}
                       </span>
                     </div>
@@ -1098,15 +1230,16 @@ export default function App() {
                   </div>
                 )}
 
+                {/* Sub-section: Settings & Themes (mobileNavSection === 'settings') */}
                 {mobileNavSection === 'settings' && (
                   <div className="space-y-4">
                     {/* Background Color Picker */}
-                    <div className="bg-white p-4 rounded-3xl border-3 border-[#6C5CE7] shadow-[0_6px_0_0_#5044AB]">
-                      <h4 className="text-xs font-black text-purple-900 mb-2.5 flex items-center gap-1.5">
+                    <div className="clay-card rounded-[32px] p-5">
+                      <h4 className="text-xs font-black text-[#26214B] mb-3 flex items-center gap-1.5">
                         <Palette className="w-4 h-4 text-purple-600" />
-                        <span>اختر لون خلفية التطبيق:</span>
+                        <span>اختر لون وثيم المنصة:</span>
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2.5">
                         {BG_COLORS.map((c) => (
                           <button
                             key={c.id}
@@ -1114,13 +1247,13 @@ export default function App() {
                               setBgColor(c.id);
                               playClick();
                             }}
-                            className={`p-2 rounded-xl text-xs font-bold border-2 flex items-center gap-2 cursor-pointer ${
+                            className={`clay-pill p-2 text-xs font-black flex items-center gap-2 cursor-pointer transition-all ${
                               bgColor === c.id 
-                                ? 'border-[#6C5CE7] bg-purple-50 font-black' 
-                                : 'border-gray-200 bg-gray-50'
+                                ? 'border-purple-400 bg-purple-100 text-purple-950 shadow-xs' 
+                                : 'text-gray-700 hover:bg-white'
                             }`}
                           >
-                            <span className="w-4 h-4 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: c.value }} />
+                            <span className="w-4 h-4 rounded-full border border-white/80 shadow-xs shrink-0" style={{ backgroundColor: c.value }} />
                             <span className="line-clamp-1">{c.name}</span>
                           </button>
                         ))}
@@ -1128,9 +1261,9 @@ export default function App() {
                     </div>
 
                     {/* Sticker Board */}
-                    <div className="bg-white p-4 rounded-3xl border-3 border-[#FF8E3C] shadow-[0_6px_0_0_#CC7130]">
-                      <h4 className="text-xs font-black text-orange-900 mb-2">جدار ملصقاتي التفاعلي ✨</h4>
-                      <div className="border-2 border-dashed border-orange-200 bg-orange-50/50 p-3 rounded-2xl flex flex-wrap justify-center gap-3 min-h-[100px] items-center">
+                    <div className="clay-card rounded-[32px] p-5">
+                      <h4 className="text-xs font-black text-[#26214B] mb-2">جدار ملصقاتي التفاعلي ✨</h4>
+                      <div className="border-2 border-dashed border-purple-200 bg-purple-50/40 p-3 rounded-2xl flex flex-wrap justify-center gap-3 min-h-[100px] items-center">
                         {selectedStickers.map((stkId) => {
                           const stk = AVAILABLE_STICKERS.find(s => s.id === stkId);
                           if (!stk) return null;

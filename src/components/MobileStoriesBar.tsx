@@ -38,11 +38,11 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
   return (
     <div className="w-full overflow-hidden py-2" dir="rtl">
       <div className="flex items-center justify-between px-2 mb-2">
-        <span className="text-xs font-black text-gray-700 flex items-center gap-1">
+        <span className="text-xs font-black text-[#26214B] flex items-center gap-1">
           <span>⚡</span>
           <span>مغامرات سريعة اليوم:</span>
         </span>
-        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+        <span className="clay-pill px-2.5 py-0.5 text-[10px] font-black text-amber-900 border-amber-200">
           اسحب للاستكشاف 👈
         </span>
       </div>
@@ -59,7 +59,7 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
             id={`story-item-${story.id}`}
           >
             {/* Story Ring Avatar */}
-            <div className={`relative p-1 rounded-full bg-gradient-to-tr ${story.bgGradient} shadow-md`}>
+            <div className={`relative p-1 rounded-full bg-gradient-to-tr ${story.bgGradient} shadow-[0_6px_16px_rgba(108,92,231,0.22)]`}>
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-3xl border-2 border-white shadow-inner">
                 <motion.span
                   whileHover={{ scale: 1.2 }}
@@ -71,13 +71,13 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
               </div>
 
               {story.isHot && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white shadow-xs animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white shadow-xs animate-pulse">
                   جديد 🔥
                 </span>
               )}
             </div>
 
-            <span className="text-[11px] font-black text-gray-800 tracking-tight text-center max-w-[68px] truncate">
+            <span className="text-[11px] font-black text-[#26214B] tracking-tight text-center max-w-[68px] truncate">
               {story.title}
             </span>
           </button>
