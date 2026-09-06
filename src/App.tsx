@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { 
@@ -398,6 +398,38 @@ export default function App() {
       });
       setShowConfirmModal(true);
     }
+  };
+
+  // Synchronized active nav section for mobile bottom dock across all games and views
+  const effectiveActiveNav: MobileNavSection = useMemo(() => {
+    if (activeTab === 'home') {
+      return mobileNavSection;
+    }
+    // If inside a Sudan Heritage game
+    if (
+      activeTab === 'pyramid_stacker' ||
+      activeTab === 'sudan_rhythm' ||
+      activeTab === 'sudan_explore' ||
+      activeTab === 'sudan_quiz' ||
+      activeTab === 'sudan_memory' ||
+      activeTab === 'sudan_dictionary' ||
+      activeTab === 'jigsaw_puzzle'
+    ) {
+      return 'sudan';
+    }
+    // If inside rewards or toy shop
+    if (activeTab === 'rewards' || activeTab === 'shop') {
+      return 'rewards';
+    }
+    // Otherwise it's in 100 Games / Educational category
+    return 'games';
+  }, [activeTab, mobileNavSection]);
+
+  const handleMobileNavClick = (section: MobileNavSection) => {
+    playClick();
+    setMobileNavSection(section);
+    setActiveTab('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const menuItems = [
@@ -832,7 +864,7 @@ export default function App() {
         
         {/* IF A GAME IS ACTIVE: FULL SCREEN ARENA */}
         {activeTab !== 'home' ? (
-          <main className="w-full max-w-7xl mx-auto p-2 sm:p-6 flex-1 pb-20">
+          <main className={`w-full max-w-7xl mx-auto p-2 sm:p-6 flex-1 ${isMobileEffective ? 'pb-28 sm:pb-32' : 'pb-20'}`}>
             <Suspense fallback={<LoadingFallback />}>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -1323,15 +1355,6 @@ export default function App() {
                     </div>
                   </div>
                 )}
-
-                {/* Floating Bottom App Dock for Mobile */}
-                <MobileBottomDock 
-                  activeNav={mobileNavSection}
-                  onSelectNav={(section) => setMobileNavSection(section)}
-                  stars={stats.stars}
-                  level={stats.level}
-                  playClickSound={playClick}
-                />
               </div>
             ) : (
               /* ========================================================================= */
@@ -1617,7 +1640,7 @@ export default function App() {
       {/* ========================================================================= */}
       {/* 4. FOOTER                                                                 */}
       {/* ========================================================================= */}
-      {!isMobileSimulator && (
+      {!isMobileEffective && (
         <footer className="bg-white p-5 border-t-4 border-amber-200 flex flex-wrap items-center justify-center gap-8 sm:gap-12 text-[#4D4D4D] mt-12 font-black text-sm sm:text-base">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🎮</span> 100 لعبة تعليمية وتراثية عبر 8 أكاديميات عالمية
@@ -1629,6 +1652,19 @@ export default function App() {
             <span className="text-2xl">🛡️</span> بيئة آمنة وخالية من الإعلانات
           </div>
         </footer>
+      )}
+
+      {/* ========================================================================= */}
+      {/* FLOATING BOTTOM APP DOCK FOR MOBILE (ALWAYS VISIBLE ACROSS ALL SECTIONS)   */}
+      {/* ========================================================================= */}
+      {isMobileEffective && !isVisualFullscreen && (
+        <MobileBottomDock 
+          activeNav={effectiveActiveNav}
+          onSelectNav={handleMobileNavClick}
+          stars={stats.stars}
+          level={stats.level}
+          playClickSound={playClick}
+        />
       )}
 
       {/* ========================================================================= */}
