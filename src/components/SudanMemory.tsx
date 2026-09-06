@@ -17,6 +17,7 @@ interface Card {
   emoji: string;
   name: string;
   description: string;
+  image?: string;
   isFlipped: boolean;
   isMatched: boolean;
 }
@@ -24,14 +25,14 @@ interface Card {
 export default function SudanMemory({ addStars }: SudanMemoryProps) {
   // 8 Unique heritage items (each will be duplicated to make 16 cards)
   const heritageItems = [
-    { emoji: '⛰️', name: 'أهرامات مروي', description: 'أقدم وأجمل أهرامات مملكة كوش العظيمة 🇸🇩' },
-    { emoji: '🌊', name: 'مقرن النيلين', description: 'ملتقى النيل الأزرق والنيل الأبيض بالخرطوم 💙' },
-    { emoji: '🏺', name: 'الجبنة الفخارية', description: 'وعاء طيني تقليدي مبهج لصنع القهوة بالزنجبيل ☕' },
-    { emoji: '🪵', name: 'العنقريب التراثي', description: 'سرير خشبي تقليدي منسوج بالحباب وبراعة الأجداد ✨' },
-    { emoji: '🌴', name: 'نخيل الشمال', description: 'أشجار النخيل الشامخة المنتجة لأجود التمور السودانية 🌴' },
-    { emoji: '🇸🇩', name: 'علم السودان الحبيب', description: 'رمز العزة والكرامة يرفرف شامخاً بالأمل 💚' },
-    { emoji: '🐢', name: 'سلحفاة سواكن', description: 'رمز حماية الحياة البحرية في شواطئ البحر الأحمر 🌊' },
-    { emoji: '🪭', name: 'الهبابة السعفية', description: 'مروحة يدوية ملونة منسوجة ببراعة من سعف النخيل 🌾' }
+    { emoji: '⛰️', name: 'أهرامات مروي', description: 'أقدم وأجمل أهرامات مملكة كوش العظيمة 🇸🇩', image: '/sd/meroe.jpg' },
+    { emoji: '🌊', name: 'مقرن النيلين', description: 'ملتقى النيل الأزرق والنيل الأبيض بالخرطوم 💙', image: '/sd/mogran.jpg' },
+    { emoji: '☕', name: 'الجبنة التراثية', description: 'وعاء طيني تقليدي مبهج لصنع القهوة بالزنجبيل ☕', image: '/sd/jebena.jpg' },
+    { emoji: '🪵', name: 'العنقريب الأصيل', description: 'سرير خشبي تقليدي منسوج بالحبال وبراعة الأجداد ✨', image: '/sd/angareb.jpg' },
+    { emoji: '🌳', name: 'شجرة التبلدي', description: 'شجرة الباوباب العملاقة وخزان الماء الطبيعي 🌳', image: '/sd/tebeldi.jpg' },
+    { emoji: '🌴', name: 'شجرة الدوم', description: 'نخيل الدوم المبارك وثماره وسعفه التراثي 🌴', image: '/sd/doum.jpg' },
+    { emoji: '🕊️', name: 'طائر القمري', description: 'طائر الود والسلام والهديل الشجي الأصيل 🕊️', image: '/sd/qimri.jpg' },
+    { emoji: '🏰', name: 'جزيرة سواكن', description: 'مدينة المرجان التاريخية وبوابة الشرق الإفريقي 🏰', image: '/sd/suakin.jpg' }
   ];
 
   const [cards, setCards] = useState<Card[]>([]);
@@ -53,6 +54,7 @@ export default function SudanMemory({ addStars }: SudanMemoryProps) {
         emoji: item.emoji,
         name: item.name,
         description: item.description,
+        image: item.image,
         isFlipped: false,
         isMatched: false
       });
@@ -63,6 +65,7 @@ export default function SudanMemory({ addStars }: SudanMemoryProps) {
         emoji: item.emoji,
         name: item.name,
         description: item.description,
+        image: item.image,
         isFlipped: false,
         isMatched: false
       });
@@ -211,9 +214,17 @@ export default function SudanMemory({ addStars }: SudanMemoryProps) {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex flex-col items-center justify-center"
+                  className="flex flex-col items-center justify-center p-1"
                 >
-                  <span className="text-2xl sm:text-4xl select-none mb-1">{card.emoji}</span>
+                  {card.image ? (
+                    <img
+                      src={card.image}
+                      alt={card.name}
+                      className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl object-cover border border-amber-300 shadow-xs mb-1"
+                    />
+                  ) : (
+                    <span className="text-2xl sm:text-4xl select-none mb-1">{card.emoji}</span>
+                  )}
                   <p className="text-[8px] sm:text-[10px] font-black text-gray-700 leading-none truncate max-w-[60px] sm:max-w-[80px]">
                     {card.name}
                   </p>

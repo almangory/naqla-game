@@ -216,13 +216,21 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
                 }}
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border-2 font-black text-xs shrink-0 cursor-pointer shadow-xs transition ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border-2 font-black text-xs shrink-0 cursor-pointer shadow-xs transition ${
                   isSelected
                     ? 'bg-amber-500 text-white border-amber-600 ring-3 ring-amber-300'
                     : 'bg-white text-gray-800 border-orange-200 hover:border-orange-400'
                 }`}
               >
-                <span className="text-xl select-none">{item.emoji}</span>
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-7 h-7 rounded-xl object-cover border border-amber-300 shrink-0 shadow-xs"
+                  />
+                ) : (
+                  <span className="text-xl select-none">{item.emoji}</span>
+                )}
                 <span className="truncate max-w-[130px]">{item.name}</span>
                 {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 fill-white shrink-0" />}
               </motion.button>
@@ -240,10 +248,32 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
           {/* Main Info Card (7 Cols) */}
           <div className="lg:col-span-7 bg-white rounded-[32px] p-6 border-4 border-amber-300 shadow-[0_6px_0_0_#D1B02B] space-y-4 text-right">
             
+            {/* Authentic High-Definition Heritage Photograph */}
+            {currentItem.image && (
+              <div className="relative w-full h-56 sm:h-72 rounded-2xl overflow-hidden border-3 border-amber-300 shadow-md bg-amber-50 group">
+                <img
+                  src={currentItem.image}
+                  alt={currentItem.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                />
+                <div className="absolute top-3 right-3 bg-black/65 backdrop-blur-md text-white text-[11px] font-black px-3 py-1 rounded-xl flex items-center gap-1.5 border border-white/20 shadow-md">
+                  <span>🇸🇩</span>
+                  <span>صورة حقيقية من أرض وتراث السودان</span>
+                </div>
+                <div className="absolute bottom-2 left-2 bg-amber-500/90 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-0.5 rounded-lg border border-amber-200">
+                  {currentItem.name}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3.5">
-                <div className="w-16 h-16 bg-gradient-to-tr from-amber-100 to-orange-50 rounded-2xl flex items-center justify-center text-4xl border-2 border-amber-300 shadow-inner select-none shrink-0">
-                  {currentItem.emoji}
+                <div className="w-16 h-16 bg-gradient-to-tr from-amber-100 to-orange-50 rounded-2xl flex items-center justify-center text-4xl border-2 border-amber-300 shadow-inner select-none shrink-0 overflow-hidden">
+                  {currentItem.image ? (
+                    <img src={currentItem.image} alt={currentItem.name} className="w-full h-full object-cover" />
+                  ) : (
+                    currentItem.emoji
+                  )}
                 </div>
                 <div>
                   <span className="text-xs font-black text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">
