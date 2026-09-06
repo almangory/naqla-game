@@ -188,8 +188,8 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
           </div>
         </div>
 
-        {/* Academies Tab Bar */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 pt-1">
+        {/* Academies Tab Bar (Wrap responsively so none are hidden) */}
+        <div className="flex flex-wrap items-center gap-2 pb-1 pt-1">
           {ACADEMIES_INFO.map((academy) => (
             <button
               key={academy.id}

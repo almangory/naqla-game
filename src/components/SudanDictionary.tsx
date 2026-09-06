@@ -343,8 +343,8 @@ export default function SudanDictionary({ addStars, onBackToMain }: SudanDiction
               />
             </div>
 
-            {/* CATEGORY FILTERS */}
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            {/* CATEGORY FILTERS (Wrap responsively) */}
+            <div className="flex flex-wrap items-center gap-2 pb-1">
               <button
                 onClick={() => { setActiveCategory('all'); setSelectedItem(null); }}
                 className={`px-4 py-2 rounded-xl text-xs font-black border-2 shrink-0 transition cursor-pointer ${

@@ -462,8 +462,8 @@ export default function FiveSensesGame({ addStars }: FiveSensesGameProps) {
           </div>
         </div>
 
-        {/* Global Navigation Tabs */}
-        <div className="flex items-center gap-1.5 bg-emerald-50/80 p-1.5 rounded-2xl border-2 border-emerald-200 overflow-x-auto no-scrollbar">
+        {/* Global Navigation Tabs (Fully visible with flex-wrap) */}
+        <div className="flex flex-wrap items-center justify-center gap-2 bg-emerald-50/80 p-2 rounded-2xl border-2 border-emerald-200">
           {[
             { id: 'atlas', label: '🔬 أطلس الحواس', emoji: '🔬' },
             { id: 'sorting', label: '🎯 تحدي المثيرات', emoji: '🎯' },
@@ -478,10 +478,10 @@ export default function FiveSensesGame({ addStars }: FiveSensesGameProps) {
                   stop();
                   setActiveTab(tab.id as TabMode);
                 }}
-                className={`py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                className={`py-2 px-3.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1.5 flex-1 sm:flex-initial text-center ${
                   isActive
                     ? 'bg-[#10B981] text-white shadow-md scale-105'
-                    : 'text-gray-700 hover:bg-white'
+                    : 'text-gray-700 hover:bg-white bg-white/70 border border-emerald-100'
                 }`}
               >
                 <span>{tab.label}</span>

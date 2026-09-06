@@ -16,7 +16,11 @@ import {
   Search,
   Building2,
   Tractor,
-  Wrench
+  Wrench,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 
 import { SUDAN_COMPREHENSIVE_ITEMS, SudanExploreItem } from '../data/sudanComprehensiveData';
@@ -39,6 +43,18 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [answeredQuizList, setAnsweredQuizList] = useState<string[]>([]);
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null);
+  const [exploreViewMode, setExploreViewMode] = useState<'strip' | 'grid'>('strip');
+  const chipsScrollRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollChips = (direction: 'prev' | 'next') => {
+    if (!chipsScrollRef.current) return;
+    const scrollAmount = 260;
+    // In RTL, negative scroll moves left towards subsequent cards
+    chipsScrollRef.current.scrollBy({
+      left: direction === 'next' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
 
   // Filtered by category and search
   const categoryItems = useMemo(() => {
@@ -182,64 +198,167 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. SEARCH & QUICK ITEM SELECTOR CAROUSEL                                  */}
+      {/* 3. SEARCH & QUICK ITEM SELECTOR (GRID OR CAROUSEL WITH CONTROLS)          */}
       {/* ========================================================================= */}
       <div className="space-y-3">
-        {/* Search input */}
-        <div className="relative max-w-md mx-auto">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={`ابحث في قسم ${selectedCategory === 'landmarks' ? 'المدن والمعالم' : selectedCategory === 'projects' ? 'المشاريع القومية' : 'الأدوات'}...`}
-            className="w-full bg-white border-2 border-orange-200 rounded-2xl py-2.5 pr-10 pl-4 text-xs font-black text-gray-800 focus:outline-none focus:border-orange-500 shadow-xs"
-          />
-          <Search className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          {searchQuery && (
+        {/* Search input & View Controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search input */}
+          <div className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={`ابحث في قسم ${selectedCategory === 'landmarks' ? 'المدن والمعالم' : selectedCategory === 'projects' ? 'المشاريع القومية' : 'الأدوات'}...`}
+              className="w-full bg-white border-2 border-orange-200 rounded-2xl py-2.5 pr-10 pl-4 text-xs font-black text-gray-800 focus:outline-none focus:border-orange-500 shadow-xs"
+            />
+            <Search className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* View Mode Switch and Navigation Arrows */}
+          <div className="flex items-center justify-between sm:justify-end gap-2">
             <button
-              onClick={() => setSearchQuery('')}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-gray-400 hover:text-gray-600"
+              onClick={() => setExploreViewMode(m => m === 'strip' ? 'grid' : 'strip')}
+              className="px-3.5 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-950 border border-orange-200 text-xs font-black flex items-center gap-1.5 transition cursor-pointer shadow-xs active:scale-95"
             >
-              ✕
+              {exploreViewMode === 'strip' ? (
+                <>
+                  <LayoutGrid className="w-3.5 h-3.5 text-orange-600" />
+                  <span>عرض الكل كشبكة 🔲</span>
+                </>
+              ) : (
+                <>
+                  <List className="w-3.5 h-3.5 text-orange-600" />
+                  <span>عرض كشريط 📜</span>
+                </>
+              )}
             </button>
-          )}
+
+            {exploreViewMode === 'strip' && (
+              <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-orange-200 shadow-xs">
+                <button
+                  onClick={() => scrollChips('prev')}
+                  className="w-7 h-7 rounded-lg bg-orange-50 hover:bg-orange-100 text-gray-700 hover:text-orange-900 flex items-center justify-center border border-orange-200 transition cursor-pointer active:scale-90"
+                  title="السابق (تمرير لليمين)"
+                  aria-label="Previous items"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <span className="text-[10px] font-black text-orange-800 px-1 select-none">
+                  {filteredItems.length}
+                </span>
+                <button
+                  onClick={() => scrollChips('next')}
+                  className="w-7 h-7 rounded-lg bg-orange-50 hover:bg-orange-100 text-gray-700 hover:text-orange-900 flex items-center justify-center border border-orange-200 transition cursor-pointer active:scale-90"
+                  title="التالي (تمرير لليسار لرؤية باقي العناصر)"
+                  aria-label="Next items"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Horizontal Chips Carousel */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 pt-1">
-          {filteredItems.map((item) => {
-            const isSelected = item.id === currentItem?.id;
-            const isAnswered = answeredQuizList.includes(item.id);
-            return (
-              <motion.button
-                key={item.id}
-                onClick={() => {
-                  setSelectedItemId(item.id);
-                  setQuizFeedback(null);
-                }}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border-2 font-black text-xs shrink-0 cursor-pointer shadow-xs transition ${
-                  isSelected
-                    ? 'bg-amber-500 text-white border-amber-600 ring-3 ring-amber-300'
-                    : 'bg-white text-gray-800 border-orange-200 hover:border-orange-400'
-                }`}
-              >
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-7 h-7 rounded-xl object-cover border border-amber-300 shrink-0 shadow-xs"
-                  />
-                ) : (
-                  <span className="text-xl select-none">{item.emoji}</span>
-                )}
-                <span className="truncate max-w-[130px]">{item.name}</span>
-                {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 fill-white shrink-0" />}
-              </motion.button>
-            );
-          })}
-        </div>
+        {/* Display Items: Grid View OR Scrollable Carousel */}
+        {exploreViewMode === 'grid' ? (
+          <div 
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-72 overflow-y-auto p-2 bg-orange-50/60 rounded-2xl border border-orange-200/80 animate-fade-in"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#F59E0B #FEF3C7'
+            }}
+          >
+            {filteredItems.map((item) => {
+              const isSelected = item.id === currentItem?.id;
+              const isAnswered = answeredQuizList.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedItemId(item.id);
+                    setQuizFeedback(null);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-2xl border-2 font-black text-xs cursor-pointer shadow-xs transition text-right ${
+                    isSelected
+                      ? 'bg-amber-500 text-white border-amber-600 ring-3 ring-amber-300'
+                      : 'bg-white text-gray-800 border-orange-200 hover:border-orange-400'
+                  }`}
+                >
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-8 h-8 rounded-xl object-cover border border-amber-300 shrink-0 shadow-xs"
+                    />
+                  ) : (
+                    <span className="text-2xl select-none shrink-0">{item.emoji}</span>
+                  )}
+                  <span className="truncate flex-1">{item.name}</span>
+                  {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 fill-white shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Horizontal Chips Carousel with Wheel & Touch Scroll */}
+            <div 
+              ref={chipsScrollRef}
+              onWheel={(e) => {
+                if (e.deltaY !== 0 && chipsScrollRef.current) {
+                  chipsScrollRef.current.scrollLeft += e.deltaY;
+                }
+              }}
+              className="flex gap-2 overflow-x-auto pb-2.5 pt-1 select-none scroll-smooth"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#F59E0B #FEF3C7'
+              }}
+            >
+              {filteredItems.map((item) => {
+                const isSelected = item.id === currentItem?.id;
+                const isAnswered = answeredQuizList.includes(item.id);
+                return (
+                  <motion.button
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedItemId(item.id);
+                      setQuizFeedback(null);
+                    }}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border-2 font-black text-xs shrink-0 cursor-pointer shadow-xs transition ${
+                      isSelected
+                        ? 'bg-amber-500 text-white border-amber-600 ring-3 ring-amber-300'
+                        : 'bg-white text-gray-800 border-orange-200 hover:border-orange-400'
+                    }`}
+                  >
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-7 h-7 rounded-xl object-cover border border-amber-300 shrink-0 shadow-xs"
+                      />
+                    ) : (
+                      <span className="text-xl select-none">{item.emoji}</span>
+                    )}
+                    <span className="truncate max-w-[130px]">{item.name}</span>
+                    {isAnswered && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 fill-white shrink-0" />}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}

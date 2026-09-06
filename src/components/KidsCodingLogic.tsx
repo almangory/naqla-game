@@ -305,8 +305,8 @@ export default function KidsCodingLogic({ addStars }: KidsCodingLogicProps) {
           </div>
         </div>
 
-        {/* Level Selectors */}
-        <div className="flex items-center gap-1.5 bg-purple-50 p-1.5 rounded-2xl border-2 border-purple-200 overflow-x-auto max-w-full">
+        {/* Level Selectors (Wrap responsively) */}
+        <div className="flex flex-wrap items-center gap-1.5 bg-purple-50 p-1.5 rounded-2xl border-2 border-purple-200 max-w-full">
           {CODING_LEVELS.map((lvl, idx) => (
             <button
               key={lvl.id}

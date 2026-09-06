@@ -195,9 +195,9 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. CATEGORY PILLS BAR                                                     */}
+      {/* 2. CATEGORY PILLS BAR (Wrap responsively so none are hidden)              */}
       {/* ========================================================================= */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex flex-wrap items-center gap-2 pb-1">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}

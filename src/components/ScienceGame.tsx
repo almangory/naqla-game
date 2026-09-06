@@ -21,7 +21,11 @@ import {
   Droplet,
   Compass,
   ArrowRight,
-  Info
+  Info,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
 
@@ -47,10 +51,22 @@ type CategoryFilter = 'all' | 'physics' | 'chemistry' | 'space' | 'biology';
 
 export default function ScienceGame({ addStars }: ScienceGameProps) {
   const { speak } = useSpeech();
+
+  // Active Experiment & Navigation States
   const [activeExp, setActiveExp] = useState<ExperimentId>('magnet');
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
+  const [expViewMode, setExpViewMode] = useState<'strip' | 'grid'>('strip');
   const [completedExperiments, setCompletedExperiments] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // Carousel ref and scroll navigation
+  const expCarouselRef = useRef<HTMLDivElement>(null);
+  const scrollExpCarousel = (direction: 'prev' | 'next') => {
+    if (expCarouselRef.current) {
+      const amount = direction === 'next' ? -260 : 260;
+      expCarouselRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+  };
 
   // Synchronous atomic ref to strictly prevent any duplicate completion or infinite loop
   const completedSetRef = useRef<Set<string>>(new Set());
@@ -589,74 +605,195 @@ export default function ScienceGame({ addStars }: ScienceGameProps) {
       {/* 2. CATEGORY FILTERS & EXPERIMENT SELECTOR TABS */}
       <div className="bg-white p-4 sm:p-5 rounded-[32px] border-4 border-amber-200 shadow-sm space-y-4">
         
-        {/* Category Filters */}
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <span className="text-xs font-black text-gray-700 flex items-center gap-1">
-            <span>🧭</span>
-            <span>المجال العلمي:</span>
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { id: 'all', label: '🌟 كل التجارب (12)' },
-              { id: 'physics', label: '🧲 فيزياء وقوى' },
-              { id: 'chemistry', label: '🧪 كيمياء ومواد' },
-              { id: 'space', label: '🪐 فضاء وضوء' },
-              { id: 'biology', label: '🌱 أحياء وموجات' },
-            ].map(f => (
-              <button
-                key={f.id}
-                onClick={() => setActiveFilter(f.id as any)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
-                  activeFilter === f.id
-                    ? 'bg-[#FF8E3C] text-white shadow-xs'
-                    : 'bg-gray-100 text-gray-700 hover:bg-amber-50'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+        {/* Category Filters & View Mode Controls */}
+        <div className="flex items-center justify-between flex-wrap gap-2.5">
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="text-xs font-black text-gray-700 flex items-center gap-1">
+              <span>🧭</span>
+              <span>المجال العلمي:</span>
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: 'all', label: '🌟 كل التجارب (12)' },
+                { id: 'physics', label: '🧲 فيزياء وقوى' },
+                { id: 'chemistry', label: '🧪 كيمياء ومواد' },
+                { id: 'space', label: '🪐 فضاء وضوء' },
+                { id: 'biology', label: '🌱 أحياء وموجات' },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setActiveFilter(f.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                    activeFilter === f.id
+                      ? 'bg-[#FF8E3C] text-white shadow-xs'
+                      : 'bg-gray-100 text-gray-700 hover:bg-amber-50'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* View Mode Toggle (Grid vs Strip) + Arrow Controls */}
+          <div className="flex items-center gap-2 mr-auto">
+            <button
+              onClick={() => setExpViewMode(prev => prev === 'strip' ? 'grid' : 'strip')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 transition cursor-pointer shadow-xs active:scale-95"
+              title={expViewMode === 'strip' ? 'عرض جميع الـ 12 تجربة كشبكة كاملة بدون أي أجزاء مخفية' : 'العودة لعرض الشريط الأفقي'}
+            >
+              {expViewMode === 'strip' ? (
+                <>
+                  <LayoutGrid className="w-3.5 h-3.5 text-amber-600" />
+                  <span>عرض الكل كشبكة 🔲</span>
+                </>
+              ) : (
+                <>
+                  <List className="w-3.5 h-3.5 text-amber-600" />
+                  <span>عرض كشريط 📜</span>
+                </>
+              )}
+            </button>
+
+            {expViewMode === 'strip' && (
+              <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-200">
+                <button
+                  onClick={() => scrollExpCarousel('prev')}
+                  className="w-7 h-7 rounded-lg bg-white hover:bg-amber-100 text-gray-700 hover:text-amber-900 flex items-center justify-center border border-gray-200 transition cursor-pointer shadow-xs active:scale-90"
+                  title="السابق (تمرير لليمين)"
+                  aria-label="Previous experiments"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <span className="text-[10px] font-black text-gray-500 px-1 select-none">
+                  {filteredList.length}
+                </span>
+                <button
+                  onClick={() => scrollExpCarousel('next')}
+                  className="w-7 h-7 rounded-lg bg-white hover:bg-amber-100 text-gray-700 hover:text-amber-900 flex items-center justify-center border border-gray-200 transition cursor-pointer shadow-xs active:scale-90"
+                  title="التالي (تمرير لليسار لرؤية باقي التجارب)"
+                  aria-label="Next experiments"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Horizontal Experiments Carousel */}
-        <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 pt-1 snap-x">
-          {filteredList.map(exp => {
-            const isSelected = activeExp === exp.id;
-            const isDone = completedExperiments.includes(exp.id);
-            return (
-              <button
-                key={exp.id}
-                onClick={() => {
-                  setActiveExp(exp.id);
-                  setShowExplanation(false);
-                  playRealisticSound('whoosh');
-                }}
-                className={`flex-1 min-w-[170px] sm:min-w-[190px] p-3.5 rounded-2xl border-3 text-right flex flex-col justify-between transition-all cursor-pointer snap-start ${
-                  isSelected
-                    ? 'bg-amber-100/90 border-[#FF8E3C] shadow-[0_6px_0_0_#CC7130] translate-y-[-2px]'
-                    : 'bg-white border-gray-200 hover:border-amber-300 shadow-[0_3px_0_0_#E0E0E0]'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-1.5">
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-950">
-                    {exp.badge.split(' ')[0]}
-                  </span>
-                  {isDone ? (
-                    <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
-                      <Check className="w-3 h-3" /> تم
+        {/* Experiments Display: Grid View OR Scrollable Strip with Controls */}
+        {expViewMode === 'grid' ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-1 animate-fade-in">
+            {filteredList.map(exp => {
+              const isSelected = activeExp === exp.id;
+              const isDone = completedExperiments.includes(exp.id);
+              return (
+                <button
+                  key={exp.id}
+                  onClick={() => {
+                    setActiveExp(exp.id);
+                    setShowExplanation(false);
+                    playRealisticSound('whoosh');
+                  }}
+                  className={`p-3 rounded-2xl border-3 text-right flex flex-col justify-between transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-100/90 border-[#FF8E3C] shadow-[0_6px_0_0_#CC7130] translate-y-[-2px]'
+                      : 'bg-white border-gray-200 hover:border-amber-300 shadow-[0_3px_0_0_#E0E0E0]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-1.5">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-950">
+                      {exp.badge.split(' ')[0]}
                     </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-gray-400">محاكاة</span>
-                  )}
-                </div>
-                <div>
-                  <h4 className="text-xs font-black text-gray-900 line-clamp-1">{exp.title}</h4>
-                  <p className="text-[10px] font-bold text-gray-500 line-clamp-1 mt-0.5">{exp.description}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                    {isDone ? (
+                      <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
+                        <Check className="w-3 h-3" /> تم
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-gray-400">محاكاة</span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-gray-900 line-clamp-1">{exp.title}</h4>
+                    <p className="text-[10px] font-bold text-gray-500 line-clamp-2 mt-0.5">{exp.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Horizontal Experiments Carousel with Mouse Wheel & Scroll Controls */}
+            <div 
+              ref={expCarouselRef}
+              onWheel={(e) => {
+                if (e.deltaY !== 0 && expCarouselRef.current) {
+                  expCarouselRef.current.scrollLeft += e.deltaY;
+                }
+              }}
+              className="flex gap-2.5 overflow-x-auto pb-3 pt-1 snap-x scroll-smooth select-none"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#F59E0B #FEF3C7'
+              }}
+            >
+              {filteredList.map(exp => {
+                const isSelected = activeExp === exp.id;
+                const isDone = completedExperiments.includes(exp.id);
+                return (
+                  <button
+                    key={exp.id}
+                    onClick={() => {
+                      setActiveExp(exp.id);
+                      setShowExplanation(false);
+                      playRealisticSound('whoosh');
+                    }}
+                    className={`flex-1 min-w-[170px] sm:min-w-[190px] p-3.5 rounded-2xl border-3 text-right flex flex-col justify-between transition-all cursor-pointer snap-start shrink-0 ${
+                      isSelected
+                        ? 'bg-amber-100/90 border-[#FF8E3C] shadow-[0_6px_0_0_#CC7130] translate-y-[-2px]'
+                        : 'bg-white border-gray-200 hover:border-amber-300 shadow-[0_3px_0_0_#E0E0E0]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-1.5">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-950">
+                        {exp.badge.split(' ')[0]}
+                      </span>
+                      {isDone ? (
+                        <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
+                          <Check className="w-3 h-3" /> تم
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-gray-400">محاكاة</span>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-gray-900 line-clamp-1">{exp.title}</h4>
+                      <p className="text-[10px] font-bold text-gray-500 line-clamp-1 mt-0.5">{exp.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick floating side navigation arrows */}
+            <button
+              onClick={() => scrollExpCarousel('prev')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-white/95 text-amber-800 shadow-md border-2 border-amber-300 flex items-center justify-center hover:bg-amber-50 hover:scale-110 transition z-10 cursor-pointer hidden md:flex active:scale-95"
+              title="السابق"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => scrollExpCarousel('next')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-white/95 text-amber-800 shadow-md border-2 border-amber-300 flex items-center justify-center hover:bg-amber-50 hover:scale-110 transition z-10 cursor-pointer hidden md:flex active:scale-95"
+              title="التالي (رؤية التجارب التالية)"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 3. CORE INTERACTIVE SIMULATION SANDBOX */}

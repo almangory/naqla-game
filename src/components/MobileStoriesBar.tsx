@@ -19,6 +19,7 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
   onSelectGame,
   playClickSound
 }) => {
+  const storiesRef = React.useRef<HTMLDivElement>(null);
   const stories: StoryItem[] = [
     { id: 'games_100_hub', title: '100 لعبة', emoji: '🌟', bgGradient: 'from-amber-400 to-red-500', isHot: true },
     { id: 'five_senses', title: 'الحواس ٥', emoji: '🖐️', bgGradient: 'from-emerald-400 to-teal-600', isHot: true },
@@ -50,7 +51,15 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
         </span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-2 pb-2 snap-x">
+      <div 
+        ref={storiesRef}
+        onWheel={(e) => {
+          if (e.deltaY !== 0 && storiesRef.current) {
+            storiesRef.current.scrollLeft += e.deltaY;
+          }
+        }}
+        className="flex gap-3 overflow-x-auto no-scrollbar px-2 pb-2 snap-x scroll-smooth"
+      >
         {stories.map((story) => (
           <button
             key={story.id}

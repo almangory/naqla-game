@@ -1075,7 +1075,7 @@ export default function App() {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                      <div className="flex flex-wrap items-center gap-1.5 pb-1">
                         {[
                           { id: 'all', label: '🌟 الكل' },
                           { id: 'puzzle', label: '🧩 بزل' },
@@ -1164,8 +1164,8 @@ export default function App() {
                           100 لعبة
                         </span>
                       </div>
-                      {/* Filter chips */}
-                      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                      {/* Filter chips (Wrap responsively) */}
+                      <div className="flex flex-wrap gap-1.5 pb-1">
                         {[
                           { id: 'all', label: '🌟 الكل' },
                           { id: 'puzzle', label: '🧩 بزل' },
