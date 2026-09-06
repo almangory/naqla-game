@@ -1,16 +1,14 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { safeStorage } from '../utils/safeStorage';
 
 export function useSoundEffects() {
   const [isMuted, setIsMuted] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('naqla_sound_muted') === 'true';
-    }
-    return false;
+    return safeStorage.getItem('naqla_sound_muted') === 'true';
   });
 
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -32,7 +30,7 @@ export function useSoundEffects() {
   const toggleMute = useCallback(() => {
     setIsMuted(prev => {
       const next = !prev;
-      localStorage.setItem('naqla_sound_muted', String(next));
+      safeStorage.setItem('naqla_sound_muted', String(next));
       return next;
     });
   }, []);

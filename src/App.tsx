@@ -32,26 +32,29 @@ import { MobileBottomDock, MobileNavSection } from './components/MobileBottomDoc
 import { MobileStoriesBar } from './components/MobileStoriesBar';
 
 // Lazy Loaded Game Modules for Performance & Code Splitting
-const ScienceGame = lazy(() => import('./components/ScienceGame'));
-const MathGame = lazy(() => import('./components/MathGame'));
-const ArabicGame = lazy(() => import('./components/ArabicGame'));
-const EnglishGame = lazy(() => import('./components/EnglishGame'));
-const Companion = lazy(() => import('./components/Companion'));
-const ToyShop = lazy(() => import('./components/ToyShop'));
-const RewardsPanel = lazy(() => import('./components/RewardsPanel'));
-const DrawingGame = lazy(() => import('./components/DrawingGame'));
-const SudanExplore = lazy(() => import('./components/SudanExplore'));
-const SudanQuiz = lazy(() => import('./components/SudanQuiz'));
-const SudanMemory = lazy(() => import('./components/SudanMemory'));
-const SudanDictionary = lazy(() => import('./components/SudanDictionary'));
-const PyramidStackerGame = lazy(() => import('./components/PyramidStackerGame'));
-const SudanRhythmGame = lazy(() => import('./components/SudanRhythmGame'));
-const AlphabetTrainGame = lazy(() => import('./components/AlphabetTrainGame'));
-const KidsCodingLogic = lazy(() => import('./components/KidsCodingLogic'));
-const Games100Hub = lazy(() => import('./components/Games100Hub'));
-const SudanJigsawPuzzle = lazy(() => import('./components/SudanJigsawPuzzle'));
-const FiveSensesGame = lazy(() => import('./components/FiveSensesGame'));
-const KidsKaraokeMicGame = lazy(() => import('./components/KidsKaraokeMicGame'));
+import { safeLazy } from './utils/safeLazy';
+import { safeStorage } from './utils/safeStorage';
+
+const ScienceGame = safeLazy(() => import('./components/ScienceGame'));
+const MathGame = safeLazy(() => import('./components/MathGame'));
+const ArabicGame = safeLazy(() => import('./components/ArabicGame'));
+const EnglishGame = safeLazy(() => import('./components/EnglishGame'));
+const Companion = safeLazy(() => import('./components/Companion'));
+const ToyShop = safeLazy(() => import('./components/ToyShop'));
+const RewardsPanel = safeLazy(() => import('./components/RewardsPanel'));
+const DrawingGame = safeLazy(() => import('./components/DrawingGame'));
+const SudanExplore = safeLazy(() => import('./components/SudanExplore'));
+const SudanQuiz = safeLazy(() => import('./components/SudanQuiz'));
+const SudanMemory = safeLazy(() => import('./components/SudanMemory'));
+const SudanDictionary = safeLazy(() => import('./components/SudanDictionary'));
+const PyramidStackerGame = safeLazy(() => import('./components/PyramidStackerGame'));
+const SudanRhythmGame = safeLazy(() => import('./components/SudanRhythmGame'));
+const AlphabetTrainGame = safeLazy(() => import('./components/AlphabetTrainGame'));
+const KidsCodingLogic = safeLazy(() => import('./components/KidsCodingLogic'));
+const Games100Hub = safeLazy(() => import('./components/Games100Hub'));
+const SudanJigsawPuzzle = safeLazy(() => import('./components/SudanJigsawPuzzle'));
+const FiveSensesGame = safeLazy(() => import('./components/FiveSensesGame'));
+const KidsKaraokeMicGame = safeLazy(() => import('./components/KidsKaraokeMicGame'));
 
 // Cheerful Kids Loading Spinner Fallback
 const LoadingFallback = () => (
@@ -129,7 +132,7 @@ export default function App() {
   // Device Simulator Mode: Toggle between Native Mobile Experience and Desktop Bento Grid
   const [isMobileSimulator, setIsMobileSimulator] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('simsim_kids_mobile_mode');
+      const saved = safeStorage.getItem('simsim_kids_mobile_mode');
       if (saved !== null) return saved === 'true';
       return window.innerWidth < 1024;
     }
@@ -143,12 +146,11 @@ export default function App() {
 
   // Background and Sticker settings states (Default to Lavender 3D Mockup Theme)
   const [bgColor, setBgColor] = useState<string>(() => {
-    return localStorage.getItem('simsim_kids_bg_color') || 'lavender_3d';
+    return safeStorage.getItem('simsim_kids_bg_color', 'lavender_3d') || 'lavender_3d';
   });
 
   const [selectedStickers, setSelectedStickers] = useState<string[]>(() => {
-    const saved = localStorage.getItem('simsim_kids_stickers');
-    return saved ? JSON.parse(saved) : ['lion', 'rocket', 'star_spark'];
+    return safeStorage.getJSON<string[]>('simsim_kids_stickers', ['lion', 'rocket', 'star_spark']);
   });
 
   // Modal confirmation state
@@ -248,17 +250,9 @@ export default function App() {
     };
   }, [activeTab]);
 
-  // Initialize stats with Local Storage fallback
+  // Initialize stats with Safe Storage fallback
   const [stats, setStats] = useState<UserStats>(() => {
-    const saved = localStorage.getItem('simsim_kids_stats');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // Fallback to default
-      }
-    }
-    return {
+    return safeStorage.getJSON<UserStats>('simsim_kids_stats', {
       stars: 0,
       level: 1,
       streak: 1,
@@ -266,24 +260,24 @@ export default function App() {
       unlockedToys: [],
       activeToy: null,
       lastPlayedDate: new Date().toLocaleDateString()
-    };
+    });
   });
 
-  // Persist states
+  // Persist states safely
   useEffect(() => {
-    localStorage.setItem('simsim_kids_bg_color', bgColor);
+    safeStorage.setItem('simsim_kids_bg_color', bgColor);
   }, [bgColor]);
 
   useEffect(() => {
-    localStorage.setItem('simsim_kids_stickers', JSON.stringify(selectedStickers));
+    safeStorage.setJSON('simsim_kids_stickers', selectedStickers);
   }, [selectedStickers]);
 
   useEffect(() => {
-    localStorage.setItem('simsim_kids_stats', JSON.stringify(stats));
+    safeStorage.setJSON('simsim_kids_stats', stats);
   }, [stats]);
 
   useEffect(() => {
-    localStorage.setItem('simsim_kids_mobile_mode', String(isMobileSimulator));
+    safeStorage.setItem('simsim_kids_mobile_mode', String(isMobileSimulator));
   }, [isMobileSimulator]);
 
   // Turn off fullscreen and reset any running confetti when switching tabs or sections
