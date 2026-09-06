@@ -96,6 +96,20 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
   const [loosePieces, setLoosePieces] = useState<number[]>([]);
   const [wrongSlotFlash, setWrongSlotFlash] = useState<number | null>(null);
 
+  // Scattered piece visual rotations (-8deg to +8deg)
+  const [pieceRotations, setPieceRotations] = useState<Record<number, number>>({});
+
+  // Touch & Pointer Drag-and-Drop state
+  const [draggingPiece, setDraggingPiece] = useState<number | null>(null);
+  const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
+  const [pointerPos, setPointerPos] = useState<{ x: number; y: number } | null>(null);
+  const [dragSize, setDragSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+
+  const boardRef = useRef<HTMLDivElement>(null);
+  const dragStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const draggedPieceRef = useRef<number | null>(null);
+
   // Stats
   const [moves, setMoves] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -138,14 +152,45 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
   const playErrorSound = () => playChime([220, 196], 'sawtooth', 0.25);
   const playWinSound = () => playChime([523, 659, 783, 1046, 1318], 'sine', 0.6);
 
+  // Detect which slot on the board is currently under the touch/pointer coordinates
+  const getSlotUnderPoint = (clientX: number, clientY: number): number | null => {
+    if (!boardRef.current) return null;
+    const slotEls = boardRef.current.querySelectorAll<HTMLElement>('[data-slot-idx]');
+    for (let i = 0; i < slotEls.length; i++) {
+      const el = slotEls[i];
+      const rect = el.getBoundingClientRect();
+      // Expanded 12px boundary for generous, forgiving finger detection on mobile screens
+      if (
+        clientX >= rect.left - 12 &&
+        clientX <= rect.right + 12 &&
+        clientY >= rect.top - 12 &&
+        clientY <= rect.bottom + 12
+      ) {
+        return Number(el.getAttribute('data-slot-idx'));
+      }
+    }
+    return null;
+  };
+
   // Initialize or reset puzzle
   const initPuzzle = () => {
     const pieces = Array.from({ length: totalPieces }, (_, i) => i);
-    // Shuffle pieces
+    // Shuffle pieces randomly
     const shuffled = [...pieces].sort(() => Math.random() - 0.5);
+
+    // Generate playful organic rotations (-8deg to +8deg)
+    const rotations: Record<number, number> = {};
+    shuffled.forEach((p) => {
+      rotations[p] = Math.round(Math.random() * 16 - 8);
+    });
+
+    setPieceRotations(rotations);
     setLoosePieces(shuffled);
     setPlacedPieces({});
     setSelectedPiece(null);
+    setDraggingPiece(null);
+    setHoveredSlot(null);
+    setPointerPos(null);
     setWrongSlotFlash(null);
     setMoves(0);
     setSeconds(0);
@@ -153,9 +198,108 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
     setIsTimerRunning(true);
   };
 
+  // Shuffle loose pieces on demand
+  const handleShufflePieces = () => {
+    if (loosePieces.length <= 1) return;
+    playPickSound();
+    const shuffled = [...loosePieces].sort(() => Math.random() - 0.5);
+    const rotations: Record<number, number> = {};
+    shuffled.forEach((p) => {
+      rotations[p] = Math.round(Math.random() * 16 - 8);
+    });
+    setPieceRotations(rotations);
+    setLoosePieces(shuffled);
+  };
+
   useEffect(() => {
     initPuzzle();
   }, [selectedImageIdx, difficulty]);
+
+  // Global Pointer Listeners for True Finger Touch Drag & Drop
+  useEffect(() => {
+    const handleGlobalPointerMove = (e: PointerEvent) => {
+      if (draggedPieceRef.current === null) return;
+
+      const dx = Math.abs(e.clientX - dragStartPosRef.current.x);
+      const dy = Math.abs(e.clientY - dragStartPosRef.current.y);
+
+      // Trigger drag after 6px movement
+      if (!isDraggingRef.current && (dx > 6 || dy > 6)) {
+        isDraggingRef.current = true;
+        setDraggingPiece(draggedPieceRef.current);
+        playPickSound();
+      }
+
+      if (isDraggingRef.current) {
+        setPointerPos({ x: e.clientX, y: e.clientY });
+        const targetSlot = getSlotUnderPoint(e.clientX, e.clientY);
+        setHoveredSlot(targetSlot);
+      }
+    };
+
+    const handleGlobalPointerUp = (e: PointerEvent) => {
+      if (draggedPieceRef.current === null) return;
+      const currentPiece = draggedPieceRef.current;
+
+      if (isDraggingRef.current) {
+        const targetSlot = getSlotUnderPoint(e.clientX, e.clientY);
+        if (targetSlot !== null && placedPieces[targetSlot] === undefined) {
+          setMoves(prev => prev + 1);
+          if (targetSlot === currentPiece) {
+            // Correct slot snap!
+            playSnapSound();
+            setPlacedPieces(prev => ({ ...prev, [targetSlot]: currentPiece }));
+            setLoosePieces(prev => prev.filter(p => p !== currentPiece));
+            setSelectedPiece(null);
+          } else {
+            // Wrong slot attempt
+            playErrorSound();
+            setWrongSlotFlash(targetSlot);
+            setTimeout(() => setWrongSlotFlash(null), 600);
+          }
+        }
+      } else {
+        // Simple tap without dragging
+        handleSelectTrayPiece(currentPiece);
+      }
+
+      draggedPieceRef.current = null;
+      isDraggingRef.current = false;
+      setDraggingPiece(null);
+      setHoveredSlot(null);
+      setPointerPos(null);
+    };
+
+    window.addEventListener('pointermove', handleGlobalPointerMove, { passive: true });
+    window.addEventListener('pointerup', handleGlobalPointerUp);
+    window.addEventListener('pointercancel', handleGlobalPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handleGlobalPointerMove);
+      window.removeEventListener('pointerup', handleGlobalPointerUp);
+      window.removeEventListener('pointercancel', handleGlobalPointerUp);
+    };
+  }, [placedPieces, loosePieces]);
+
+  // Pointer Down on a loose piece
+  const handlePiecePointerDown = (e: React.PointerEvent, pieceIdx: number) => {
+    if (isCompleted) return;
+
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+    isDraggingRef.current = false;
+    draggedPieceRef.current = pieceIdx;
+
+    // Calibrate drag size to match board slot dimensions
+    if (boardRef.current) {
+      const slotEl = boardRef.current.querySelector<HTMLElement>('[data-slot-idx]');
+      if (slotEl) {
+        const rect = slotEl.getBoundingClientRect();
+        setDragSize({ width: rect.width, height: rect.height });
+      }
+    }
+
+    setPointerPos({ x: e.clientX, y: e.clientY });
+  };
 
   // Timer effect
   useEffect(() => {
@@ -438,7 +582,7 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. MAIN PUZZLE ARENA (BOARD & TRAY)                                       */}
+      {/* 3. MAIN PUZZLE ARENA (BOARD & SCATTERED PIECES TRAY)                      */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
@@ -449,7 +593,9 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
             <h3 className="text-sm font-black text-gray-800 flex items-center gap-2">
               <span>إطار تجميع اللوحة:</span>
               <span className="text-xs text-purple-700 font-bold">
-                {selectedPiece !== null ? '👉 انقر على الخانة المناسبة لتثبيت القطعة' : 'انقر على أي قطعة من السلة لتحديدها'}
+                {selectedPiece !== null 
+                  ? '👉 انقر على الخانة لتثبيت القطعة المحددة' 
+                  : '🖐️ اسحب القطعة بإصبعك وأفلتها في مكانها'}
               </span>
             </h3>
             <span className="text-xs font-black text-gray-500">
@@ -459,7 +605,8 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
 
           {/* Jigsaw Board Grid */}
           <div 
-            className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border-4 border-purple-400 bg-gray-100 shadow-inner select-none"
+            ref={boardRef}
+            className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border-4 border-purple-400 bg-gray-100 shadow-inner select-none touch-none"
             dir="ltr"
           >
             {/* Ghost Underlying Image (Semi-transparent helper) */}
@@ -470,7 +617,7 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
               />
             )}
 
-            {/* Grid Slots */}
+            {/* Grid Slots - 100% Number-free tactile slots */}
             <div 
               className="grid w-full h-full"
               style={{
@@ -482,19 +629,23 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
                 const placedPieceIdx = placedPieces[slotIdx];
                 const isPlaced = placedPieceIdx !== undefined;
                 const isFlashingWrong = wrongSlotFlash === slotIdx;
+                const isHovered = hoveredSlot === slotIdx && !isPlaced;
 
                 return (
                   <div
                     key={slotIdx}
+                    data-slot-idx={slotIdx}
                     onClick={() => handleSlotClick(slotIdx)}
-                    className={`relative border border-white/60 flex items-center justify-center transition-all cursor-pointer ${
+                    className={`relative border transition-all select-none flex items-center justify-center ${
                       isPlaced
-                        ? 'cursor-pointer hover:brightness-105'
+                        ? 'border-white/40 cursor-pointer hover:brightness-105'
+                        : isHovered
+                        ? 'border-2 border-purple-600 bg-purple-200/70 ring-4 ring-purple-400/60 scale-[1.02] z-10'
                         : isFlashingWrong
-                        ? 'bg-red-500/40 border-red-500 animate-wiggle'
+                        ? 'bg-red-500/40 border-2 border-red-500 animate-wiggle z-10'
                         : selectedPiece !== null
-                        ? 'hover:bg-purple-400/30 hover:border-purple-600'
-                        : 'hover:bg-black/5'
+                        ? 'border-dashed border-purple-400/80 hover:bg-purple-300/30 cursor-pointer'
+                        : 'border-dashed border-purple-200/80 bg-white/20'
                     }`}
                   >
                     {/* Placed Piece Graphic */}
@@ -512,10 +663,14 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
                       </motion.div>
                     )}
 
-                    {/* Empty Slot Helper Marker */}
+                    {/* Empty Slot - Clean & Number-Free */}
                     {!isPlaced && (
-                      <div className="text-gray-400/50 font-black text-xs sm:text-sm select-none">
-                        #{slotIdx + 1}
+                      <div className="w-full h-full flex items-center justify-center pointer-events-none">
+                        {isHovered ? (
+                          <span className="text-xl sm:text-2xl animate-bounce">✨</span>
+                        ) : (
+                          <div className="w-2.5 h-2.5 rounded-full bg-purple-300/40" />
+                        )}
                       </div>
                     )}
                   </div>
@@ -542,53 +697,63 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
 
         </div>
 
-        {/* RIGHT / BOTTOM: TRAY OF LOOSE PIECES (5 Columns) */}
+        {/* RIGHT / BOTTOM: TRAY OF SCATTERED PIECES (5 Columns) */}
         <div className="lg:col-span-5 bg-white rounded-[32px] p-5 border-4 border-amber-300 shadow-[0_8px_0_0_#F59E0B] space-y-4">
           
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-black text-gray-800 flex items-center gap-1.5">
-              <span>سلة القطع المبعثرة:</span>
+              <span>سجادة القطع المبعثرة:</span>
               <span className="text-xs font-bold text-amber-700">({loosePieces.length} متبقية)</span>
             </h3>
             
             <button
-              onClick={() => setLoosePieces(prev => [...prev].sort(() => Math.random() - 0.5))}
+              onClick={handleShufflePieces}
               disabled={loosePieces.length <= 1}
-              className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-black flex items-center gap-1 cursor-pointer transition disabled:opacity-30"
+              className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-black flex items-center gap-1.5 cursor-pointer transition disabled:opacity-30 shadow-xs"
+              title="إعادة بعثرة وخلط زوايا القطع"
             >
               <Shuffle className="w-3.5 h-3.5" />
-              <span>خلط القطع</span>
+              <span>خلط وبعثرة 🔀</span>
             </button>
           </div>
 
-          {/* Tray Grid of Pieces */}
+          {/* Tray Grid of Scattered Pieces - Organic Rotations without numbers */}
           {loosePieces.length > 0 ? (
             <div 
-              className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-amber-50/60 rounded-2xl border-2 border-dashed border-amber-300 max-h-[380px] overflow-y-auto"
+              className="p-4 bg-gradient-to-br from-amber-50/90 via-orange-50/50 to-amber-100/70 rounded-3xl border-3 border-dashed border-amber-300 max-h-[420px] overflow-y-auto shadow-inner touch-none"
               dir="ltr"
             >
-              {loosePieces.map((pieceIdx) => {
-                const isSelected = selectedPiece === pieceIdx;
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-1">
+                {loosePieces.map((pieceIdx) => {
+                  const isSelected = selectedPiece === pieceIdx;
+                  const isBeingDragged = draggingPiece === pieceIdx;
+                  const rot = pieceRotations[pieceIdx] || 0;
 
-                return (
-                  <motion.div
-                    key={pieceIdx}
-                    whileHover={{ scale: 1.06, y: -3 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSelectTrayPiece(pieceIdx)}
-                    className={`aspect-[16/9] rounded-xl overflow-hidden border-3 cursor-pointer shadow-md relative transition-all ${
-                      isSelected
-                        ? 'border-[#6C5CE7] ring-4 ring-[#A29BFE] scale-105 shadow-xl animate-pulse'
-                        : 'border-white hover:border-amber-400'
-                    }`}
-                    style={getPieceStyle(pieceIdx)}
-                  >
-                    <div className="absolute top-1 left-1 bg-black/50 backdrop-blur-xs text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
-                      #{pieceIdx + 1}
+                  return (
+                    <div
+                      key={pieceIdx}
+                      onPointerDown={(e) => handlePiecePointerDown(e, pieceIdx)}
+                      style={{
+                        transform: isBeingDragged 
+                          ? 'scale(0.85)' 
+                          : `rotate(${rot}deg)`,
+                        opacity: isBeingDragged ? 0.35 : 1,
+                        touchAction: 'none'
+                      }}
+                      className={`aspect-[16/9] rounded-2xl overflow-hidden border-3 cursor-grab active:cursor-grabbing shadow-md relative transition-all duration-150 select-none ${
+                        isSelected
+                          ? 'border-[#6C5CE7] ring-4 ring-[#A29BFE] scale-105 shadow-xl'
+                          : 'border-white hover:border-amber-400 hover:scale-105 hover:rotate-0'
+                      }`}
+                    >
+                      <div 
+                        className="w-full h-full pointer-events-none"
+                        style={getPieceStyle(pieceIdx)}
+                      />
                     </div>
-                  </motion.div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <div className="p-8 text-center bg-emerald-50 rounded-2xl border-2 border-dashed border-emerald-300 text-emerald-800">
@@ -600,14 +765,32 @@ export default function SudanJigsawPuzzle({ addStars }: SudanJigsawPuzzleProps) 
             </div>
           )}
 
-          {/* Helpful Touch Instructions */}
-          <div className="p-3 bg-gray-50 rounded-xl text-[11px] font-bold text-gray-500 text-center leading-relaxed">
-            💡 <strong>طريقة اللعب:</strong> انقر على أي قطعة من السلة لتحديدها، ثم انقر على موقعها المناسب في لوحة البزل لتستقر بصوت جميل!
+          {/* Helpful Touch & Drag Instructions */}
+          <div className="p-3 bg-amber-50/80 rounded-2xl border border-amber-200 text-[11px] font-bold text-amber-900 text-center leading-relaxed">
+            🖐️ <strong>طريقة اللعب:</strong> اسحب أي قطعة مبعثرة بإصبعك وضعها في مكانها الصحيح على اللوحة، أو انقر على القطعة ثم انقر على مكانها!
           </div>
 
         </div>
 
       </div>
+
+      {/* Floating Drag Avatar Following Finger */}
+      {draggingPiece !== null && pointerPos !== null && (
+        <div
+          className="fixed pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 select-none touch-none"
+          style={{
+            left: `${pointerPos.x}px`,
+            top: `${pointerPos.y}px`,
+            width: dragSize.width > 0 ? `${dragSize.width}px` : '130px',
+            height: dragSize.height > 0 ? `${dragSize.height}px` : '74px',
+          }}
+        >
+          <div 
+            className="w-full h-full rounded-2xl border-4 border-amber-400 shadow-[0_22px_45px_rgba(0,0,0,0.5)] ring-4 ring-amber-300/80 scale-105"
+            style={getPieceStyle(draggingPiece)}
+          />
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 4. FULL PREVIEW MODAL                                                     */}
