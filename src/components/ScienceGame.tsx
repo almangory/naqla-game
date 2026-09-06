@@ -52,6 +52,25 @@ export default function ScienceGame({ addStars }: ScienceGameProps) {
   const [completedExperiments, setCompletedExperiments] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
 
+  // Synchronous atomic ref to strictly prevent any duplicate completion or infinite loop
+  const completedSetRef = useRef<Set<string>>(new Set());
+
+  // Reset any active confetti and extinguish burner when switching experiments or unmounting
+  useEffect(() => {
+    setBurnerFlame('off');
+    try {
+      confetti.reset();
+    } catch (e) {}
+  }, [activeExp]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        confetti.reset();
+      } catch (e) {}
+    };
+  }, []);
+
   // Audio Synthesizer for Physical Events
   const playRealisticSound = (type: 'metal_clink' | 'heavy_thud' | 'spark' | 'bubble' | 'splash' | 'hum' | 'whoosh' | 'tone', freq = 440) => {
     try {
@@ -123,15 +142,13 @@ export default function ScienceGame({ addStars }: ScienceGameProps) {
   };
 
   const markExperimentDone = (id: ExperimentId) => {
-    if (!completedExperiments.includes(id)) {
-      setCompletedExperiments(prev => [...prev, id]);
-      addStars(15);
-      confetti({
-        particleCount: 70,
-        spread: 70,
-        origin: { y: 0.7 }
-      });
+    if (completedSetRef.current.has(id)) {
+      setShowExplanation(true);
+      return;
     }
+    completedSetRef.current.add(id);
+    setCompletedExperiments(Array.from(completedSetRef.current));
+    addStars(15);
     setShowExplanation(true);
   };
 
@@ -308,26 +325,23 @@ export default function ScienceGame({ addStars }: ScienceGameProps) {
     if (burnerFlame === 'off') return;
     const interval = setInterval(() => {
       setMatterTemp(t => {
-        if (burnerFlame === 'high') {
-          const next = Math.min(130, t + 4);
-          if (next >= 100) {
-            playRealisticSound('bubble');
-            markExperimentDone('matter_states');
-          }
-          return next;
-        } else if (burnerFlame === 'low') {
-          const next = Math.min(75, t + 2);
-          return next;
-        } else if (burnerFlame === 'ice') {
-          const next = Math.max(-25, t - 4);
-          if (next <= 0) markExperimentDone('matter_states');
-          return next;
-        }
+        if (burnerFlame === 'high') return Math.min(130, t + 4);
+        if (burnerFlame === 'low') return Math.min(75, t + 2);
+        if (burnerFlame === 'ice') return Math.max(-25, t - 4);
         return t;
       });
     }, 250);
     return () => clearInterval(interval);
   }, [burnerFlame]);
+
+  useEffect(() => {
+    if (matterTemp >= 100) {
+      playRealisticSound('bubble');
+      markExperimentDone('matter_states');
+    } else if (matterTemp <= 0) {
+      markExperimentDone('matter_states');
+    }
+  }, [matterTemp]);
 
   // =========================================================================
   // 5. INTERACTIVE CIRCUIT BREADBOARD (BATTERY, WIRES, KNIFE SWITCH & BULB)

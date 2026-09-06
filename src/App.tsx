@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { 
@@ -170,10 +170,19 @@ export default function App() {
     localStorage.setItem('simsim_kids_mobile_mode', String(isMobileSimulator));
   }, [isMobileSimulator]);
 
-  // Turn off fullscreen when switching tabs
+  // Turn off fullscreen and reset any running confetti when switching tabs or sections
   useEffect(() => {
     setIsVisualFullscreen(false);
+    try {
+      confetti.reset();
+    } catch (e) {}
   }, [activeTab]);
+
+  useEffect(() => {
+    try {
+      confetti.reset();
+    } catch (e) {}
+  }, [mobileNavSection]);
 
   // Handle consecutive streak logic on mount
   useEffect(() => {
@@ -199,31 +208,27 @@ export default function App() {
     }
   }, []);
 
-  // Helpers for rewards and confetti
+  const lastConfettiTimeRef = useRef(0);
+
+  // Helpers for rewards and confetti with flood protection
   const addStars = (amount: number) => {
+    const now = Date.now();
+    // Only fire confetti once every 1000ms max to prevent queue flooding
+    if (now - lastConfettiTimeRef.current > 1000) {
+      lastConfettiTimeRef.current = now;
+      playStarSound();
+      try {
+        confetti({
+          particleCount: 45,
+          spread: 55,
+          origin: { y: 0.75 }
+        });
+      } catch (e) {}
+    }
+
     setStats(prev => {
       const nextStars = prev.stars + amount;
       const nextLevel = Math.floor(nextStars / 50) + 1;
-
-      playStarSound();
-
-      confetti({
-        particleCount: 70,
-        spread: 70,
-        origin: { y: 0.75 }
-      });
-
-      if (nextLevel > prev.level) {
-        playLevelUp();
-        setTimeout(() => {
-          confetti({
-            particleCount: 120,
-            spread: 100,
-            origin: { y: 0.6 }
-          });
-        }, 300);
-      }
-
       return {
         ...prev,
         stars: nextStars,
