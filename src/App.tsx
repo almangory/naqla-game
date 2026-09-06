@@ -134,6 +134,97 @@ export default function App() {
   const [onConfirm, setOnConfirm] = useState<() => void>(() => {});
   const [onCancel, setOnCancel] = useState<() => void>(() => {});
 
+  // 📲 PWA Installation & Device Back Button Controller
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
+  const [showIosInstallGuide, setShowIosInstallGuide] = useState<boolean>(false);
+  const [showExitModal, setShowExitModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsAppInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    playClick();
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsAppInstalled(true);
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+      }
+      setDeferredPrompt(null);
+    } else {
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      if (isIos) {
+        setShowIosInstallGuide(true);
+      } else {
+        alert("لتثبيت تطبيق ألعاب نقلة:\nاضغط على خيارات المتصفح (⋮) ثم اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية' 📲✨");
+      }
+    }
+  };
+
+  // Sync browser history with activeTab for mobile hardware & gesture back button
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (activeTab !== 'home') {
+      if (window.location.hash !== '#' + activeTab) {
+        window.history.pushState({ tab: activeTab }, '', '#' + activeTab);
+      }
+    } else {
+      if (window.location.hash) {
+        window.history.replaceState({ tab: 'home' }, '', window.location.pathname);
+      }
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (!window.history.state) {
+      window.history.replaceState({ tab: 'home' }, '', window.location.pathname);
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (activeTab !== 'home') {
+        // User pressed phone back button while in a game -> smoothly return to home!
+        setActiveTab('home');
+      } else {
+        // User pressed phone back button while already on home -> Show exit confirmation!
+        window.history.pushState({ tab: 'home' }, '', window.location.pathname);
+        setShowExitModal(true);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [activeTab]);
+
   // Initialize stats with Local Storage fallback
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('simsim_kids_stats');
@@ -513,24 +604,23 @@ export default function App() {
               className="flex items-center gap-2.5 cursor-pointer group text-right"
               id="header-logo-btn"
             >
-              <div className="w-11 h-11 sm:w-13 sm:h-13 bg-gradient-to-tr from-[#FF6B6B] to-[#FF8E3C] rounded-2xl border-3 border-white shadow-[0_4px_0_0_#CC5555] flex items-center justify-center text-2xl sm:text-3xl text-white shrink-0 group-hover:scale-105 group-active:scale-95 transition-transform">
-                <motion.span
-                  animate={{ rotate: [0, 6, -6, 0] }}
-                  transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
-                  className="select-none"
-                >
-                  🦉
-                </motion.span>
+              <div className="w-11 h-11 sm:w-13 sm:h-13 bg-white rounded-2xl border-3 border-amber-300 shadow-[0_4px_0_0_#D97706] flex items-center justify-center shrink-0 group-hover:scale-105 group-active:scale-95 transition-transform overflow-hidden p-0.5">
+                <img 
+                  src="/favicon.png" 
+                  alt="NAQLA Games Logo" 
+                  className="w-full h-full object-cover rounded-xl"
+                />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
                   <h1 className="text-base sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-1">
-                    <span>أكاديمية نقلة</span>
-                    <span className="text-amber-500 text-xs sm:text-base">🇸🇩✨</span>
+                    <span>ألعاب نقلة</span>
+                    <span className="text-purple-600 font-black text-xs sm:text-sm">NAQLA</span>
+                    <span className="text-amber-500 text-xs sm:text-base">🎮✨</span>
                   </h1>
                 </div>
-                <p className="text-[10px] sm:text-xs font-bold text-amber-800 line-clamp-1 hidden sm:block">
-                  عالم الألعاب الذكية، التراث، وحساب الأبطال
+                <p className="text-[10px] sm:text-xs font-bold text-indigo-900 line-clamp-1 hidden sm:block">
+                  منصة الألعاب الإلكترونية التفاعلية لجميع المراحل
                 </p>
               </div>
             </button>
@@ -565,6 +655,24 @@ export default function App() {
                 </>
               )}
             </button>
+
+            {/* PWA App Install Button */}
+            {!isAppInstalled ? (
+              <button
+                onClick={handleInstallApp}
+                className="px-2.5 sm:px-3.5 py-1.5 rounded-2xl text-[11px] sm:text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-2 border-emerald-700 shadow-[0_3px_0_0_#065f46] flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                title="تثبيت التطبيق على هاتفك أو حاسوبك للوصول السريع"
+                id="install-pwa-btn"
+              >
+                <span>📲</span>
+                <span className="hidden sm:inline">تثبيت التطبيق</span>
+              </button>
+            ) : (
+              <span className="hidden md:flex items-center gap-1 text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-1 rounded-xl">
+                <span>✅</span>
+                <span>تطبيق مثبت</span>
+              </span>
+            )}
 
             {/* Sound Toggle Button */}
             <button
@@ -1366,6 +1474,126 @@ export default function App() {
                   لا، إلغاء ❌
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+        {/* ========================================================================= */}
+        {/* 6. APP EXIT CONFIRMATION MODAL (FOR MOBILE HARDWARE & GESTURE BACK)       */}
+        {/* ========================================================================= */}
+        {showExitModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" id="app-exit-modal">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowExitModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="bg-white rounded-[32px] border-4 border-[#6C5CE7] shadow-[0_12px_0_0_#4A3CB5] p-6 sm:p-8 max-w-md w-full relative z-50 text-center"
+            >
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl border-3 border-purple-300 overflow-hidden shadow-lg p-1 bg-gradient-to-tr from-purple-100 to-indigo-50">
+                <img src="/favicon.png" alt="Naqla Games" className="w-full h-full object-cover rounded-xl" />
+              </div>
+
+              <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-2 leading-relaxed">
+                هل أنت متأكد من الخروج من تطبيق ألعاب نقلة؟ 🎮👋
+              </h3>
+              
+              <p className="text-xs sm:text-sm font-bold text-gray-600 mb-6">
+                سنشتاق إليك كثيراً! كل ألعابك وإنجازاتك ونجومك ⭐ محفوظة وجاهزة دائماً لعودتك في أي وقت!
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowExitModal(false);
+                    // Try closing the tab/app or navigate back
+                    if (window.history.length > 1) {
+                      window.history.go(-2);
+                    } else {
+                      window.close();
+                    }
+                  }}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm rounded-2xl border-3 border-red-700 shadow-[0_4px_0_0_#991B1B] active:translate-y-1 active:shadow-none transition cursor-pointer flex items-center justify-center gap-1.5"
+                  id="exit-modal-confirm"
+                >
+                  <span>🚪</span>
+                  <span>نعم، خروج من التطبيق</span>
+                </button>
+                <button
+                  onClick={() => setShowExitModal(false)}
+                  className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-2xl border-3 border-emerald-700 shadow-[0_4px_0_0_#065F46] active:translate-y-1 active:shadow-none transition cursor-pointer flex items-center justify-center gap-1.5"
+                  id="exit-modal-stay"
+                >
+                  <span>🎮</span>
+                  <span>البقاء واللعب!</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* 7. iOS Safari Installation Guide Modal */}
+        {showIosInstallGuide && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" id="ios-install-modal">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowIosInstallGuide(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="bg-white rounded-[32px] border-4 border-indigo-500 shadow-[0_12px_0_0_#3730A3] p-6 sm:p-8 max-w-md w-full relative z-50 text-right"
+            >
+              <div className="flex items-center justify-between pb-3 border-b-2 border-indigo-100 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-indigo-200 p-0.5 bg-indigo-50">
+                    <img src="/favicon.png" alt="Naqla Games" className="w-full h-full object-cover rounded-lg" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-gray-900">تثبيت تطبيق ألعاب نقلة 📲</h3>
+                    <p className="text-[11px] text-gray-500 font-bold">على أجهزة الآيفون والآيباد (iOS)</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowIosInstallGuide(false)}
+                  className="p-1 rounded-full hover:bg-gray-100 text-gray-500 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3.5 text-xs sm:text-sm font-bold text-gray-700 mb-6">
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-black shrink-0">1</span>
+                  <span>اضغط على زر المشاركة <strong>(⎋ Share)</strong> في أسفل شاشة متصفح Safari.</span>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-black shrink-0">2</span>
+                  <span>مرر القائمة لأسفل واختر <strong>(إضافة إلى الشاشة الرئيسية ➕ Add to Home Screen)</strong>.</span>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-black shrink-0">3</span>
+                  <span>اضغط على <strong>(إضافة Add)</strong> في الزاوية العلوية وسيظهر التطبيق على شاشتك بأيقونته الرسمية فوراً! 🌟</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowIosInstallGuide(false)}
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm rounded-2xl border-3 border-indigo-800 shadow-[0_4px_0_0_#312E81] active:translate-y-1 transition cursor-pointer"
+              >
+                فهمت، سأقوم بالتثبيت الآن! 👍
+              </button>
             </motion.div>
           </div>
         )}
