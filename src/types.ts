@@ -18,7 +18,10 @@ export type GameCategory =
   | 'sudan_memory' 
   | 'sudan_dictionary'
   | 'pyramid_stacker'
-  | 'sudan_rhythm';
+  | 'sudan_rhythm'
+  | 'alphabet_train'
+  | 'kids_coding'
+  | 'games_100_hub';
 
 export interface UserStats {
   stars: number;

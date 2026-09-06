@@ -47,6 +47,9 @@ const SudanMemory = lazy(() => import('./components/SudanMemory'));
 const SudanDictionary = lazy(() => import('./components/SudanDictionary'));
 const PyramidStackerGame = lazy(() => import('./components/PyramidStackerGame'));
 const SudanRhythmGame = lazy(() => import('./components/SudanRhythmGame'));
+const AlphabetTrainGame = lazy(() => import('./components/AlphabetTrainGame'));
+const KidsCodingLogic = lazy(() => import('./components/KidsCodingLogic'));
+const Games100Hub = lazy(() => import('./components/Games100Hub'));
 
 // Cheerful Kids Loading Spinner Fallback
 const LoadingFallback = () => (
@@ -301,6 +304,17 @@ export default function App() {
       badge: 'الرئيسية'
     },
     { 
+      id: 'games_100_hub', 
+      isNew: true, 
+      label: '🌟 موسوعة الـ 100 لعبة (100 Hub)', 
+      category: 'all', 
+      borderColor: 'border-[#F59E0B]', 
+      shadowColor: 'shadow-[0_8px_0_0_#D97706]', 
+      bgGradient: 'from-amber-100 to-yellow-200',
+      desc: 'بوابة الـ 100 لعبة التعليمية المتكاملة عبر 8 أكاديميات عالمية للأذكياء!',
+      badge: '100 لعبة 🚀'
+    },
+    { 
       id: 'pyramid_stacker', 
       isNew: true, 
       label: '⛰️ بناة أهرامات كوش', 
@@ -363,6 +377,17 @@ export default function App() {
       badge: 'English 🔤'
     },
     { 
+      id: 'alphabet_train', 
+      isNew: true, 
+      label: '🚂 قطار الحروف وسباق الكلمات', 
+      category: 'languages', 
+      borderColor: 'border-[#3B82F6]', 
+      shadowColor: 'shadow-[0_8px_0_0_#1D4ED8]', 
+      bgGradient: 'from-blue-50 to-indigo-100',
+      desc: 'Alphabet Train Express & Word Racer Car: ركب عربات قطار الحروف وقُد سيارة السباق لتجميع الكلمات!',
+      badge: 'قطار وسباق 🏎️'
+    },
+    { 
       id: 'drawing', 
       label: '🎨 مرسم الألوان السحرية', 
       category: 'arts', 
@@ -401,6 +426,17 @@ export default function App() {
       bgGradient: 'from-teal-50 to-cyan-100',
       desc: 'تحديات ذكاء وأسئلة ممتعة جداً عن ثقافة وطبيعة وتاريخ السودان!',
       badge: 'فوازير 💡'
+    },
+    { 
+      id: 'kids_coding', 
+      isNew: true, 
+      label: '🤖 مغامرة برمجة الروبوت (Kids Coding)', 
+      category: 'brain', 
+      borderColor: 'border-[#8B5CF6]', 
+      shadowColor: 'shadow-[0_8px_0_0_#6D28D9]', 
+      bgGradient: 'from-purple-50 to-indigo-100',
+      desc: 'متاهة الخوارزميات والبرمجة بالأسهم: وجّه الروبوت عبر العقبات والتقط مجوهرات الطاقة!',
+      badge: 'برمجة 🧠'
     },
     { 
       id: 'sudan_memory', 
@@ -687,6 +723,21 @@ export default function App() {
                   {activeTab === 'rewards' && (
                     <RewardsPanel stats={stats} />
                   )}
+                  {activeTab === 'alphabet_train' && (
+                    <AlphabetTrainGame addStars={addStars} />
+                  )}
+                  {activeTab === 'kids_coding' && (
+                    <KidsCodingLogic addStars={addStars} />
+                  )}
+                  {activeTab === 'games_100_hub' && (
+                    <Games100Hub 
+                      stars={stats.stars} 
+                      onLaunchGame={(engine) => {
+                        setActiveTab(engine);
+                        playStarSound();
+                      }} 
+                    />
+                  )}
                 </motion.div>
               </AnimatePresence>
             </Suspense>
@@ -722,6 +773,34 @@ export default function App() {
                       level={stats.level}
                       stars={stats.stars}
                     />
+
+                    {/* 🌟 100 Games Academy Mobile Launcher Card */}
+                    <motion.button
+                      onClick={() => {
+                        setActiveTab('games_100_hub');
+                        playStarSound();
+                      }}
+                      whileTap={{ scale: 0.96 }}
+                      className="w-full p-4 rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white border-3 border-amber-300 shadow-[0_6px_0_0_#C2410C] flex items-center justify-between text-right cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl select-none animate-bounce">🌟</span>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-sm font-black">أكاديمية الـ 100 لعبة</h4>
+                            <span className="bg-yellow-300 text-yellow-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">
+                              موسوعة كاملة 🔥
+                            </span>
+                          </div>
+                          <p className="text-[10px] font-bold text-white/90 line-clamp-1 mt-0.5">
+                            قطار الحروف، سباق السيارات، العلوم، البرمجة، وكوش!
+                          </p>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1.5 bg-white text-orange-600 font-black text-xs rounded-xl shadow-xs shrink-0">
+                        استكشف 🚀
+                      </div>
+                    </motion.button>
 
                     {/* Quick Access Featured Games */}
                     <div>
@@ -1098,6 +1177,47 @@ export default function App() {
 
                 </div>
 
+                {/* 🌟 100 Educational Games Academy Hub Master Banner */}
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-[32px] p-6 sm:p-7 text-white border-4 border-amber-300 shadow-[0_10px_0_0_#C2410C] flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer"
+                  onClick={() => {
+                    setActiveTab('games_100_hub');
+                    playStarSound();
+                  }}
+                >
+                  <div className="flex items-center gap-5 text-right">
+                    <div className="w-18 h-18 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl border-3 border-white/60 shadow-inner shrink-0 animate-bounce">
+                      🌟
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 bg-yellow-300 text-yellow-950 px-3 py-0.5 rounded-full text-xs font-black shadow-xs mb-1.5">
+                        <Sparkles className="w-3.5 h-3.5 fill-current" />
+                        <span>موسوعة المئة لعبة التفاعلية الشاملة</span>
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-black">
+                        أكاديمية الـ 100 لعبة: منهاج الأبطال العالمي 🚀
+                      </h3>
+                      <p className="text-xs sm:text-sm font-bold text-white/90 mt-1">
+                        قطار الحروف الأبجدية، سباق سيارات تجميع الكلمات، محاكاة العلوم، الرياضيات، وبرمجة الروبوتات!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-3">
+                    <div className="text-center bg-black/20 backdrop-blur-xs px-4 py-2 rounded-2xl border border-white/30 hidden sm:block">
+                      <span className="text-xl font-black block">100 / 100</span>
+                      <span className="text-[10px] text-white/80 font-bold">لعبة متكاملة</span>
+                    </div>
+                    <button
+                      className="px-6 py-3.5 bg-white hover:bg-yellow-100 text-orange-700 font-black text-sm rounded-2xl border-3 border-white shadow-md flex items-center gap-2 cursor-pointer transition active:scale-95"
+                    >
+                      <span>تصفح الأكاديمية بالكامل</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+
                 {/* 3. Games Bento Grid with Quick Filter Chips */}
                 <div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
@@ -1209,7 +1329,7 @@ export default function App() {
       {!isMobileSimulator && (
         <footer className="bg-white p-5 border-t-4 border-amber-200 flex flex-wrap items-center justify-center gap-8 sm:gap-12 text-[#4D4D4D] mt-12 font-black text-sm sm:text-base">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🎮</span> 14 لعبة تعليمية وتراثية ممتعة
+            <span className="text-2xl">🎮</span> 100 لعبة تعليمية وتراثية عبر 8 أكاديميات عالمية
           </div>
           <div className="flex items-center gap-2">
             <span className="text-2xl">🇸🇩</span> حضارة وتاريخ السودان للأطفال
