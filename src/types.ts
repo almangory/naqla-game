@@ -21,6 +21,7 @@ export type GameCategory =
   | 'sudan_rhythm'
   | 'alphabet_train'
   | 'kids_coding'
+  | 'jigsaw_puzzle'
   | 'games_100_hub';
 
 export interface UserStats {

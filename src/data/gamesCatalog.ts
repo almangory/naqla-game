@@ -1461,5 +1461,64 @@ export const ALL_100_GAMES: GameCatalogItem[] = [
     ageGroup: '4-9 سنوات',
     skillsLearned: ['إدارة الوقت', 'العادات الصحية الإيجابية'],
     starsReward: 20
+  },
+  // =========================================================================
+  // 10. JIGSAW PUZZLES & CULTURAL PICTURES (ألعاب البزل وتركيب الصور)
+  // =========================================================================
+  {
+    id: 'puzzle_karam',
+    title: 'بزل كرم الضيافة وإفطار الشارع السوداني 🍲',
+    academy: 'sudan',
+    academyName: 'كوش وتراث السودان',
+    badge: 'بزل التراث 🧩',
+    icon: '🍲',
+    desc: 'ركّب لوحة كرم أهل السودان وإفطار الشارع العتيق قطعة بقطعة مع أصوات تفاعلية وتلميحات ذكية!',
+    engine: 'jigsaw_puzzle',
+    difficulty: 'easy',
+    ageGroup: '4-12 سنة',
+    skillsLearned: ['التركيز البصري', 'الذاكرة المكانية', 'قيم الكرم والتكافل'],
+    starsReward: 30
+  },
+  {
+    id: 'puzzle_angareb',
+    title: 'بزل جلسة الجد والعنقريب وتلاوة الذكر 📖',
+    academy: 'sudan',
+    academyName: 'كوش وتراث السودان',
+    badge: 'بزل الأجداد 🧩',
+    icon: '☕',
+    desc: 'جمّع صورة الجد الحكيم على العنقريب الخشبي مع الجبنة السودانية وسوط العنج العتيق!',
+    engine: 'jigsaw_puzzle',
+    difficulty: 'medium',
+    ageGroup: '5-12 سنة',
+    skillsLearned: ['التناسق البصري الحركي', 'التعرف على التراث السوداني'],
+    starsReward: 30
+  },
+  {
+    id: 'puzzle_ana_boy',
+    title: 'بزل أنا ولغتي العربية في الطبيعة الساحرة 🌸',
+    academy: 'arabic',
+    academyName: 'لغتي العربية الجميلة',
+    badge: 'بزل الحروف 🧩',
+    icon: '🌸',
+    desc: 'لوحة كرتونية ثلاثية الأبعاد تنبض بالحياة؛ ركب صورة الطفل والأرنوب وحرف (أ) وكلمة (أنا)!',
+    engine: 'jigsaw_puzzle',
+    difficulty: 'easy',
+    ageGroup: '4-10 سنوات',
+    skillsLearned: ['التمييز البصري', 'حب اللغة العربية', 'الصبر وحل المشكلات'],
+    starsReward: 25
+  },
+  {
+    id: 'puzzle_history_kush',
+    title: 'بزل معلم التاريخ وحضارات النيل وكرمة 🏛️',
+    academy: 'sudan',
+    academyName: 'كوش وتراث السودان',
+    badge: 'بزل الحضارة 🧩',
+    icon: '🏛️',
+    desc: 'تحدي تاريخي شيق؛ ركب تفاصيل خريطة النيل ومملكة كرمة العريقة مع الشيخ الجليل والأطفال!',
+    engine: 'jigsaw_puzzle',
+    difficulty: 'hard',
+    ageGroup: '6-14 سنة',
+    skillsLearned: ['تاريخ السودان القديم', 'قوة الملاحظة', 'التفكير الاستراتيجي'],
+    starsReward: 35
   }
 ];

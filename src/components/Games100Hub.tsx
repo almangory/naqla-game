@@ -73,6 +73,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
       sudan_memory: 'sudan_memory',
       sudan_dictionary: 'sudan_dictionary',
       drawing: 'drawing',
+      jigsaw_puzzle: 'jigsaw_puzzle',
       companion: 'companion',
       shop: 'shop',
       rewards: 'rewards'

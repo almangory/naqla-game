@@ -49,6 +49,7 @@ const SudanRhythmGame = lazy(() => import('./components/SudanRhythmGame'));
 const AlphabetTrainGame = lazy(() => import('./components/AlphabetTrainGame'));
 const KidsCodingLogic = lazy(() => import('./components/KidsCodingLogic'));
 const Games100Hub = lazy(() => import('./components/Games100Hub'));
+const SudanJigsawPuzzle = lazy(() => import('./components/SudanJigsawPuzzle'));
 
 // Cheerful Kids Loading Spinner Fallback
 const LoadingFallback = () => (
@@ -104,7 +105,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<GameCategory>('home');
   const [mobileNavSection, setMobileNavSection] = useState<MobileNavSection>('home');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'sudan' | 'science' | 'languages' | 'arts' | 'brain'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'sudan' | 'science' | 'languages' | 'arts' | 'brain' | 'puzzle'>('all');
 
   // Screen size detection for automatic mobile responsive parallel layout
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(() => {
@@ -549,6 +550,17 @@ export default function App() {
       badge: 'برمجة 🧠'
     },
     { 
+      id: 'jigsaw_puzzle', 
+      isNew: true, 
+      label: '🧩 ألعاب البزل وتركيب اللوحات (Jigsaw Puzzle)', 
+      category: 'puzzle', 
+      borderColor: 'border-[#6C5CE7]', 
+      shadowColor: 'shadow-[0_8px_0_0_#5845D8]', 
+      bgGradient: 'from-purple-50 to-indigo-100', 
+      desc: 'جمّع لوحات التراث السوداني والقصص المصورة قطعة بقطعة مع أصوات تفاعلية ومستويات وتلميحات ذكية!', 
+      badge: 'بزل ذكي 🧩' 
+    },
+    { 
       id: 'sudan_memory', 
       label: '🧩 لعبة الذاكرة التراثية', 
       category: 'brain', 
@@ -861,6 +873,9 @@ export default function App() {
                   {activeTab === 'kids_coding' && (
                     <KidsCodingLogic addStars={addStars} />
                   )}
+                  {activeTab === 'jigsaw_puzzle' && (
+                    <SudanJigsawPuzzle addStars={addStars} />
+                  )}
                   {activeTab === 'games_100_hub' && (
                     <Games100Hub 
                       stars={stats.stars} 
@@ -1007,6 +1022,7 @@ export default function App() {
                       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                         {[
                           { id: 'all', label: '🌟 الكل' },
+                          { id: 'puzzle', label: '🧩 بزل' },
                           { id: 'sudan', label: '🇸🇩 كوش' },
                           { id: 'science', label: '🧪 علوم' },
                           { id: 'languages', label: '📚 لغات' },
@@ -1096,6 +1112,7 @@ export default function App() {
                       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                         {[
                           { id: 'all', label: '🌟 الكل' },
+                          { id: 'puzzle', label: '🧩 بزل' },
                           { id: 'sudan', label: '🇸🇩 كوش' },
                           { id: 'science', label: '🧪 علوم' },
                           { id: 'languages', label: '📚 لغات' },
@@ -1479,6 +1496,7 @@ export default function App() {
                     <div className="flex flex-wrap gap-2">
                       {[
                         { id: 'all', label: '🌟 كل الألعاب', color: 'bg-amber-100 text-amber-950 border-amber-300' },
+                        { id: 'puzzle', label: '🧩 بزل وتراكيب', color: 'bg-violet-100 text-violet-950 border-violet-300' },
                         { id: 'sudan', label: '🇸🇩 أمجاد السودان', color: 'bg-emerald-100 text-emerald-950 border-emerald-300' },
                         { id: 'science', label: '🧪 علوم وحساب', color: 'bg-cyan-100 text-cyan-950 border-cyan-300' },
                         { id: 'languages', label: '📚 لغات وحروف', color: 'bg-purple-100 text-purple-950 border-purple-300' },
