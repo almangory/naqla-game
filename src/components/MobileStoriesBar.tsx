@@ -21,6 +21,8 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
 }) => {
   const stories: StoryItem[] = [
     { id: 'games_100_hub', title: '100 لعبة', emoji: '🌟', bgGradient: 'from-amber-400 to-red-500', isHot: true },
+    { id: 'five_senses', title: 'الحواس ٥', emoji: '🖐️', bgGradient: 'from-emerald-400 to-teal-600', isHot: true },
+    { id: 'karaoke_mic', title: 'المايك 🎤', emoji: '🎤', bgGradient: 'from-pink-500 to-rose-600', isHot: true },
     { id: 'jigsaw_puzzle', title: 'البزل', emoji: '🧩', bgGradient: 'from-fuchsia-500 to-indigo-600', isHot: true },
     { id: 'alphabet_train', title: 'قطار الحروف', emoji: '🚂', bgGradient: 'from-blue-500 to-indigo-600', isHot: true },
     { id: 'kids_coding', title: 'البرمجة', emoji: '🤖', bgGradient: 'from-purple-500 to-indigo-600', isHot: true },

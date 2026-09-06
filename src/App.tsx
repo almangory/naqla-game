@@ -50,6 +50,8 @@ const AlphabetTrainGame = lazy(() => import('./components/AlphabetTrainGame'));
 const KidsCodingLogic = lazy(() => import('./components/KidsCodingLogic'));
 const Games100Hub = lazy(() => import('./components/Games100Hub'));
 const SudanJigsawPuzzle = lazy(() => import('./components/SudanJigsawPuzzle'));
+const FiveSensesGame = lazy(() => import('./components/FiveSensesGame'));
+const KidsKaraokeMicGame = lazy(() => import('./components/KidsKaraokeMicGame'));
 
 // Cheerful Kids Loading Spinner Fallback
 const LoadingFallback = () => (
@@ -448,14 +450,36 @@ export default function App() {
       badge: 'أورغن وموسيقى 🎹'
     },
     { 
+      id: 'karaoke_mic', 
+      isNew: true, 
+      label: '🎤 مايكروفون النجوم الغنائي (Kids Karaoke)', 
+      category: 'arts', 
+      borderColor: 'border-[#EC4899]', 
+      shadowColor: 'shadow-[0_8px_0_0_#BE185D]', 
+      bgGradient: 'from-pink-50 to-rose-100', 
+      desc: 'امسك مايك الألعاب واغنِّ أجمل الأناشيد وغيّر صوتك لصوت الروبوت والسنجاب مع تصفيق الجمهور وأضواء الديسكو!', 
+      badge: 'مايك كاريوكي 🎙️' 
+    },
+    { 
       id: 'science', 
       label: '🧪 مختبر العلوم والفيزياء', 
       category: 'science', 
       borderColor: 'border-[#45AAF2]', 
       shadowColor: 'shadow-[0_8px_0_0_#3888C1]', 
       bgGradient: 'from-sky-50 to-blue-100',
-      desc: 'اكتشف قوانين الجاذبية والسرعة والكثافة وتجارب الحواس الخمس الممتعة!',
+      desc: 'اكتشف قوانين الجاذبية والسرعة والكثافة وتجارب الفيزياء والكيمياء الممتعة!',
       badge: 'علوم 🔬'
+    },
+    { 
+      id: 'five_senses', 
+      isNew: true, 
+      label: '🖐️ مختبر الحواس الخمسة (Five Senses Lab)', 
+      category: 'science', 
+      borderColor: 'border-[#10B981]', 
+      shadowColor: 'shadow-[0_8px_0_0_#059669]', 
+      bgGradient: 'from-emerald-50 to-teal-100', 
+      desc: 'تعرف على حواسك الخمس بطريقة علمية تفاعلية: البصر، السمع، الشم، التذوق، واللمس مع تجارب ومسابقات ممتعة!', 
+      badge: 'علوم الحواس 👁️' 
     },
     { 
       id: 'math', 
@@ -875,6 +899,12 @@ export default function App() {
                   )}
                   {activeTab === 'jigsaw_puzzle' && (
                     <SudanJigsawPuzzle addStars={addStars} />
+                  )}
+                  {activeTab === 'five_senses' && (
+                    <FiveSensesGame addStars={addStars} />
+                  )}
+                  {activeTab === 'karaoke_mic' && (
+                    <KidsKaraokeMicGame addStars={addStars} />
                   )}
                   {activeTab === 'games_100_hub' && (
                     <Games100Hub 

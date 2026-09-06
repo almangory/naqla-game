@@ -22,6 +22,8 @@ export type GameCategory =
   | 'alphabet_train'
   | 'kids_coding'
   | 'jigsaw_puzzle'
+  | 'five_senses'
+  | 'karaoke_mic'
   | 'games_100_hub';
 
 export interface UserStats {
