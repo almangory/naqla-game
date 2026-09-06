@@ -376,9 +376,10 @@ export default function KidsCodingLogic({ addStars }: KidsCodingLogicProps) {
             <span className="text-amber-400">الهدف: التقاط خلية الطاقة ⚡</span>
           </div>
 
-          {/* 5x5 Grid Cells */}
+          {/* 5x5 Grid Cells (Strictly Left to Right) */}
           <div 
             className="grid gap-2 bg-slate-950 p-4 rounded-3xl border-3 border-purple-800 shadow-inner"
+            dir="ltr"
             style={{
               gridTemplateColumns: `repeat(${currentLevel.gridSize}, minmax(0, 1fr))`
             }}

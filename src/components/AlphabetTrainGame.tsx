@@ -526,10 +526,17 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
             </div>
 
             {/* The Moving / Interactive Train on Rails */}
-            <div className="relative py-8">
+            <div className="relative py-8" dir="ltr">
               
+              {/* Train direction indicator banner */}
+              <div className="flex items-center justify-center gap-2 mb-3 text-xs font-black text-blue-900 bg-white/80 px-3.5 py-1 rounded-full border border-blue-300 w-fit mx-auto" dir="ltr">
+                <span>Alphabet Direction: Left to Right ➔</span>
+                <span className="text-blue-600 font-bold" dir="rtl">(ترتيب الحروف الإنجليزية يبدأ من اليسار)</span>
+              </div>
+
               <motion.div 
                 className="flex items-end justify-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap"
+                dir="ltr"
                 animate={isTrainMoving ? { x: [0, 40, -40, 0] } : {}}
                 transition={{ duration: 1.5, repeat: isTrainMoving ? Infinity : 0 }}
               >
@@ -569,7 +576,7 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                   </div>
                 </div>
 
-                {/* 🚃 Train Wagons (Slots) */}
+                {/* 🚃 Train Wagons (Slots in Left-to-Right sequence) */}
                 {userTrainWagons.map((wagonLetter, idx) => {
                   const isBlankSlot = currentStation.blankIndices.includes(idx);
                   const isFilled = wagonLetter !== null;
@@ -640,7 +647,7 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                   <div className="text-5xl mb-2">🎉🚂✨</div>
                   <h4 className="text-xl font-black text-emerald-800">مرحى يا بطل الحروف!</h4>
                   <p className="text-xs font-bold text-emerald-950 mt-1">
-                    اكتمل قطار الحروف بنجاح! كسبت 20 نجمة إضافية ⭐
+                    اكتمل قطار الحروف بنجاح من اليسار لليمين! كسبت 20 نجمة إضافية ⭐
                   </p>
                   <div className="flex items-center justify-center gap-3 mt-4">
                     <button
@@ -676,7 +683,7 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                 </span>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4" dir="ltr">
                 {availableWagonOptions.map((letter) => (
                   <motion.button
                     key={letter}
@@ -709,13 +716,14 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
               <span className="text-4xl sm:text-5xl">{currentRacer.emoji}</span>
               <div>
                 <span className="text-xs font-bold text-red-200">الكلمة المستهدفة ({currentRacer.hintAr})</span>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1" dir="ltr">
                   <h3 className="text-2xl sm:text-3xl font-black tracking-widest bg-black/20 px-4 py-1 rounded-2xl border border-white/20">
                     {currentRacer.word}
                   </h3>
                   <button
                     onClick={() => speakWord(currentRacer.word)}
                     className="p-2 bg-white/20 hover:bg-white/30 rounded-xl cursor-pointer transition"
+                    title="استمع للكلمة"
                   >
                     <Volume2 className="w-5 h-5" />
                   </button>
@@ -723,10 +731,10 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
               </div>
             </div>
 
-            {/* Collected Letters Progress Bar */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-red-100 ml-1">الحروف المجموعة:</span>
-              <div className="flex gap-1.5">
+            {/* Collected Letters Progress Bar in LTR */}
+            <div className="flex items-center gap-2" dir="ltr">
+              <span className="text-xs font-bold text-red-100 mr-1" dir="rtl">الحروف المجمّعة:</span>
+              <div className="flex gap-1.5" dir="ltr">
                 {currentRacer.letters.map((char, idx) => {
                   const isCollected = idx < collectedLetters.length;
                   return (
@@ -746,7 +754,7 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
             </div>
           </div>
 
-          {/* Dynamic 3-Lane Race Track Arena */}
+          {/* Dynamic 3-Lane Race Track Arena in LTR */}
           <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 rounded-[36px] p-6 border-4 border-red-500 shadow-[0_10px_0_0_#991B1B] relative overflow-hidden">
             
             {/* Speedometer & Turbo HUD */}
@@ -755,14 +763,14 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                 <Gauge className="w-4 h-4" />
                 <span>السرعة: 180 كم/س</span>
               </div>
-              <div className="flex items-center gap-1.5 text-emerald-400">
+              <div className="flex items-center gap-1.5 text-emerald-400" dir="ltr">
                 <Zap className="w-4 h-4" />
-                <span>الهدف التالي: الحرف [{currentRacer.letters[collectedLetters.length] || '🏆'}]</span>
+                <span>Next Target: [{currentRacer.letters[collectedLetters.length] || '🏆'}]</span>
               </div>
             </div>
 
-            {/* 3 Asphalt Lanes */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 relative min-h-[320px] sm:min-h-[360px] bg-gray-950 p-4 rounded-3xl border-2 border-gray-700">
+            {/* 3 Asphalt Lanes (Strictly Left to Right) */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 relative min-h-[320px] sm:min-h-[360px] bg-gray-950 p-4 rounded-3xl border-2 border-gray-700" dir="ltr">
               
               {/* Lane Markings */}
               {[0, 1, 2].map((laneIndex) => (
@@ -773,8 +781,8 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                     carLane === laneIndex ? 'bg-red-500/10 border-red-500/50' : ''
                   }`}
                 >
-                  <span className="text-[10px] font-black text-gray-500">
-                    {laneIndex === 0 ? 'المسار الأيسر' : laneIndex === 1 ? 'المسار الأوسط' : 'المسار الأيمن'}
+                  <span className="text-[10px] font-black text-gray-400">
+                    {laneIndex === 0 ? 'المسار الأيسر (Left)' : laneIndex === 1 ? 'المسار الأوسط (Center)' : 'المسار الأيمن (Right)'}
                   </span>
 
                   {/* Floating Letter Crystals in Lanes */}
@@ -832,14 +840,14 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
               ))}
             </div>
 
-            {/* Steering Buttons Controls (Accessible for Mobile & Desktop) */}
-            <div className="flex items-center justify-center gap-4 mt-5">
+            {/* Steering Buttons Controls (Physically Mapped Left to Right) */}
+            <div className="flex items-center justify-center gap-4 mt-5" dir="ltr">
               <button
                 onClick={() => setCarLane(prev => Math.max(0, prev - 1))}
                 className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm rounded-2xl border-3 border-blue-800 shadow-[0_4px_0_0_#1E3A8A] flex items-center justify-center gap-2 cursor-pointer active:translate-y-1"
               >
-                <ArrowRight className="w-5 h-5" />
-                <span>المسار السابق</span>
+                <ArrowLeft className="w-5 h-5" />
+                <span>المسار الأيسر (Left)</span>
               </button>
 
               <button
@@ -854,8 +862,8 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                 onClick={() => setCarLane(prev => Math.min(2, prev + 1))}
                 className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm rounded-2xl border-3 border-blue-800 shadow-[0_4px_0_0_#1E3A8A] flex items-center justify-center gap-2 cursor-pointer active:translate-y-1"
               >
-                <span>المسار التالي</span>
-                <ArrowLeft className="w-5 h-5" />
+                <span>المسار الأيمن (Right)</span>
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
 
@@ -872,7 +880,7 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
                     <div className="text-6xl mb-2 animate-bounce">🏁🏎️🏆</div>
                     <h3 className="text-2xl font-black text-red-600">بطل السباق الخارق!</h3>
                     <p className="text-sm font-bold text-gray-700 mt-2">
-                      جمّعت كلمة ({currentRacer.word}) بمهارة فائقة وسرعة قياسية!
+                      جمّعت كلمة ({currentRacer.word}) بالترتيب الإنجليزي الصحيح من اليسار لليمين!
                     </p>
                     <div className="bg-amber-100 text-amber-900 font-black text-xs py-2 px-4 rounded-xl inline-block mt-3 border border-amber-300">
                       ⭐ كسبت +25 نجمة ذهبية
@@ -914,11 +922,11 @@ export default function AlphabetTrainGame({ addStars }: AlphabetTrainGameProps) 
               <span>انقر على أي حرف للاستماع إلى نطقه الأمريكي ومثاله الصوتي:</span>
             </h3>
             <span className="text-xs font-black bg-emerald-100 text-emerald-900 px-3 py-1 rounded-full">
-              26 حرف أبجدي كامل
+              26 حرف أبجدي كامل (A - Z)
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3" dir="ltr">
             {Object.entries(PHONICS_DATA).map(([letter, data]) => (
               <motion.button
                 key={letter}

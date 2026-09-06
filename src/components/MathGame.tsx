@@ -274,18 +274,19 @@ export default function MathGame({ addStars }: MathGameProps) {
             <h3 className="text-xl font-black text-[#CC9300] mb-4">ساعد القطار على التقدم بحل المعادلة:</h3>
 
             {/* Animated Train Equation */}
-            <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="flex items-center justify-center gap-3 mb-8" dir="ltr">
               <motion.div
                 animate={{ x: [-10, 10, -10] }}
                 transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
                 className="bg-[#45AAF2] text-white font-black text-4xl p-6 rounded-3xl border-4 border-[#3888C1] shadow-[0_6px_0_0_#3888C1] relative flex items-center gap-4"
+                dir="ltr"
               >
                 <span>{numA}</span>
                 <span className="text-[#FFD93D]">{operation}</span>
                 <span>{numB}</span>
                 <span className="text-[#FFD93D]">=</span>
-                <span className="bg-[#1B4F72] px-5 py-1.5 rounded-2xl border-2 border-sky-200 text-white animate-pulse">؟</span>
-                <div className="absolute -bottom-3 left-10 text-2xl">🚂</div>
+                <span className="bg-[#1B4F72] px-5 py-1.5 rounded-2xl border-2 border-sky-200 text-white animate-pulse">?</span>
+                <div className="absolute -bottom-3 right-10 text-2xl">🚂</div>
               </motion.div>
             </div>
 
