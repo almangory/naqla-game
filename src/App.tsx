@@ -327,13 +327,13 @@ export default function App() {
     { 
       id: 'sudan_rhythm', 
       isNew: true, 
-      label: '🪘 إيقاعات وطبول السودان', 
+      label: '🎹 أورغن وأنغام السودان', 
       category: 'arts', 
-      borderColor: 'border-[#FF8E3C]', 
-      shadowColor: 'shadow-[0_8px_0_0_#CC7130]', 
-      bgGradient: 'from-orange-50 to-amber-100',
-      desc: 'مختبر موسيقي لعزف الدلوكة والنقارة والطنبور مع سمسم بإيقاعات حقيقية!',
-      badge: 'موسيقى 🎵'
+      borderColor: 'border-[#6C5CE7]', 
+      shadowColor: 'shadow-[0_8px_0_0_#4A3CB5]', 
+      bgGradient: 'from-purple-50 to-indigo-100',
+      desc: 'عزف الأورغن الموسيقي بالسلم الخماسي، وطبول الدلوكة والنقارة التراثية مع سمسم!',
+      badge: 'أورغن وموسيقى 🎹'
     },
     { 
       id: 'science', 

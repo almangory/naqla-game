@@ -3,10 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Timer, Sparkles, Award, RotateCcw, AlertTriangle, BookOpen, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { 
+  Timer, 
+  Sparkles, 
+  RotateCcw, 
+  BookOpen, 
+  Volume2, 
+  ArrowLeft, 
+  ArrowRight, 
+  Shuffle, 
+  Filter,
+  CheckCircle2
+} from 'lucide-react';
 
+import { SUDAN_100_RIDDLES, SudanRiddle } from '../data/sudanRiddlesData';
 import { useSpeech } from '../hooks/useSpeech';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import confetti from 'canvas-confetti';
@@ -15,97 +27,38 @@ interface SudanQuizProps {
   addStars: (amount: number) => void;
 }
 
-interface Riddle {
-  id: number;
-  question: string;
-  options: string[];
-  correct: string;
-  infoTitle: string;
-  abundantInfo: string;
-  emoji: string;
-}
+const CATEGORIES = [
+  { id: 'all', name: '🌟 كل الـ 100 لغز' },
+  { id: 'history', name: '🏛️ حضارات ومعالم كوش' },
+  { id: 'nature', name: '🌊 الأنهار والطبيعة' },
+  { id: 'projects', name: '🚜 المشاريع القومية' },
+  { id: 'tools', name: '🛠️ الأدوات التراثية والزراعية' },
+  { id: 'food', name: '🌾 المحاصيل والأطعمة' },
+  { id: 'culture', name: '🪘 التراث والموسيقى والقيم' },
+  { id: 'wildlife', name: '🦅 الحياة البرية' }
+];
 
 export default function SudanQuiz({ addStars }: SudanQuizProps) {
   const { speak } = useSpeech();
-  const { playClick, playCorrect, playWrong, playStarSound } = useSoundEffects();
+  const { playCorrect, playWrong, playStarSound } = useSoundEffects();
 
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentRiddleIdx, setCurrentRiddleIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [feedback, setFeedback] = useState<{ correct: boolean; message: string } | null>(null);
-  const [score, setScore] = useState(0);
+  const [solvedIds, setSolvedIds] = useState<number[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Abundant educational database of Sudan riddles and culture
-  const riddles: Riddle[] = [
-    {
-      id: 1,
-      question: "أنا نهر سوداني عظيم وعذب، أنبع من بحيرة تانا في إثيوبيا، وألتقي بالنيل الأبيض في مقرن الخرطوم لنشكل أطول نهر في العالم. فمن أكون؟",
-      options: ["النيل الأزرق", "نهر عطبرة", "بحر الغزال"],
-      correct: "النيل الأزرق",
-      emoji: "🌊",
-      infoTitle: "نهر النيل الأزرق وسر جريانه العظيم 🌊",
-      abundantInfo: "النيل الأزرق يمد نهر النيل الرئيسي بحوالي 80% إلى 85% من مجمل مياهه خلال فترة الفيضان الصيفية! ينبع من بحيرة تانا في مرتفعات إثيوبيا، ويتميز بقوة جارفة ومياه محملة بالطمي الخصيب المفيد للزراعة. يلتقي مع النيل الأبيض الهادئ في الخرطوم مشكلاً لوحة طبيعية فريدة من تعانق النهرين بلونيهما المختلفين."
-    },
-    {
-      id: 2,
-      question: "أنا سرير خشبي سوداني عريق، منسوج بحبال قوية من السعف أو خيوط الجلد، لا يخلو مني أي ديوان أو حوش سوداني للجلوس والترحيب بالضيوف. فمن أكون؟",
-      options: ["العنقريب", "الفندك", "المشلعيب"],
-      correct: "العنقريب",
-      emoji: "🪵",
-      infoTitle: "تاريخ وسحر 'العنقريب' السوداني 🪵",
-      abundantInfo: "يعتبر العنقريب من أقدم قطع الأثاث التراثية في وادي النيل والسودان، حيث وجدت نماذج شبيهة به في مقابر الفراعنة والملوك الكوشيين في كرمة ومروي! يرمز العنقريب للأصالة والهيبة في المنزل السوداني، وتصنع هياكله يدوياً من أخشاب الغابات الصلبة مثل السيال والطلح، ويُنسج بالدوم أو الجلد ليوفر راحة باردة وطبيعية ممتازة في صيف السودان الحار."
-    },
-    {
-      id: 3,
-      question: "أنا معلم أثري مذهل يقع في شمال السودان، شيدتُ قبل آلاف السنين لتكون مدافن لملوك وملكات مملكة كوش. هل تعلم أن عددنا يتجاوز 220؟ فمن أكون؟",
-      options: ["أهرامات مروي (البجراوية)", "جزيرة سواكن", "جبل البركل"],
-      correct: "أهرامات مروي (البجراوية)",
-      emoji: "⛰️",
-      infoTitle: "أهرامات مروي (البجراوية) حضارة كوش العريقة ⛰️",
-      abundantInfo: "تعتبر أهرامات مروي في منطقة البجراوية شهادة حية على عظمة مملكة كوش النوبية القديمة التي ازدهرت في شمال السودان. تتميز هذه الأهرامات بزواياها الحادة الضيقة وقواعدها الصغيرة مقارنة بأهرامات مصر. كانت هذه الأهرامات مدافن للملوك والملكات الذين حكموا إمبراطورية شاسعة امتدت حتى مصر والشرق الأوسط، وهي مسجلة كأثر عالمي فريد في اليونسكو."
-    },
-    {
-      id: 4,
-      question: "أنا إناء طيني فخاري أسود اللون ذو عنق ضيق وقاعدة مستديرة، أصنع فيه القهوة السودانية اللذيذة الممزوجة بالزنجبيل والمستكة والبهارات، فمن أكون؟",
-      options: ["الجبنة", "الزير", "الفندك"],
-      correct: "الجبنة",
-      emoji: "🏺",
-      infoTitle: "طقوس 'الجبنة' السودانية والقهوة بالزنجبيل ☕",
-      abundantInfo: "الجبنة (بفتح الجيم والباء) هي رمز الكرم والضيافة والونسة الحميمة في السودان. تُصنع الجبنة يدوياً من الطين الأسود الفخاري الحراري المحروق، وتوضع فوق موقد صغير مملوء بالجمر لغلي البن المحمص مع الزنجبيل الطازج والقرفة والمستكة. ترافق جلسة الجبنة طقوس جميلة مثل تزيين المكان بجريد النخل وسعف النخل وبخور التيمام وصينية الفناجين الصغيرة المبهجة."
-    },
-    {
-      id: 5,
-      question: "أنا إقليم بركاني جبلي مخضر يقع في غرب السودان، أتميز بطقس بارد معتدل كطقس البحر المتوسط، وتتساقط فيّ الأمطار لتشكل شلالات رائعة وتسقي بساتين الفاكهة كالتفاح والموالح. فمن أكون؟",
-      options: ["جبل مرة", "تلال البحر الأحمر", "جبال النوبة"],
-      correct: "جبل مرة",
-      emoji: "🌲",
-      infoTitle: "جنة غرب السودان: جبل مرة الساحر 🌲⛰️",
-      abundantInfo: "جبل مرة هو عبارة عن مجموعة من القمم البركانية الخامدة التي ترتفع إلى أكثر من 3000 متر فوق سطح البحر في ولاية وسط دارفور. يتميز الجبل بمناخ فريد شديد الاعتدال، حيث تزرع فيه شتى أنواع الفواكه التي لا تنبت في مناطق السودان الأخرى مثل التفاح والعنب والكمثرى والبرتقال. تكثر فيه العيون الكبريتية والمجاري المائية والشلالات المنحدرة مثل شلال قلول الساحر."
-    },
-    {
-      id: 6,
-      question: "أنا مادة طبيعية ثمينة صمغية، يستخرجني الأهل من جذوع أشجار الهشاب والطلح في حزام الصمغ العربي في السودان، ويعتبر السودان أكبر منتج لي في العالم بنسبة تفوق 70%! فمن أكون؟",
-      options: ["الصمغ العربي", "القطن طويل التيلة", "زيت السمسم"],
-      correct: "الصمغ العربي",
-      emoji: "🌳",
-      infoTitle: "الصمغ العربي السوداني: الذهب الأصفر الفريد 🌳✨",
-      abundantInfo: "الصمغ العربي السوداني هو منتج استراتيجي عالمي هام جداً، يدخل في صناعة الأدوية والأغذية والمشروبات الغازية والحلويات والطباعة لخصائصه الفيزيائية الفريدة. ينمو الصمغ طبيعياً في مناطق كردفان ودارفور والنيل الأزرق عبر طقس 'طق الصمغ' التقليدي حيث يقوم المزارعون بقشط لحاء شجرة الهشاب بلطف لتبدأ الشجرة بإفراز دموع صمغية ذهبية مذهلة تُجمع وتُفرز وتُصدر لكل بقاع الأرض."
-    },
-    {
-      id: 7,
-      question: "أنا مروحة يد تراثية سودانية، أنسج يدوياً من سعف النخيل الملون، يستخدمني الأجداد والآباء لتبريد الوجه وتحريك الهواء عند الحر الشديد. فمن أكون؟",
-      options: ["الهبابة (الهواية)", "البرش", "المشلعيب"],
-      correct: "الهبابة (الهواية)",
-      emoji: "🪭",
-      infoTitle: "الهبابة اليدوية ومصنوعات السعف التراثية 🪭🌾",
-      abundantInfo: "الهبابة أو الهواية هي مروحة يد صغيرة منسوجة ببراعة من خوص أو سعف النخيل، حيث يتم غمر سعف النخيل في الماء ليرطب ثم صبغه بألوان مبهجة مثل الأحمر والأخضر والأصفر، وتنسج يدوياً بنقوش هندسية نوبية تراثية ساحرة. تستخدم لتوليد الهواء البارد اللطيف باليد وتعتبر من التحف التقليدية اللطيفة في التراث الشعبي السوداني."
-    }
-  ];
+  // Filtered riddles based on selected category
+  const activeRiddles = useMemo(() => {
+    if (selectedCategory === 'all') return SUDAN_100_RIDDLES;
+    return SUDAN_100_RIDDLES.filter(r => r.category === selectedCategory);
+  }, [selectedCategory]);
 
-  const currentRiddle = riddles[currentRiddleIdx];
+  const currentRiddle: SudanRiddle = activeRiddles[currentRiddleIdx] || activeRiddles[0];
 
   // Speech Synthesizer for Riddles
   const readRiddleAloud = (text: string) => {
@@ -133,7 +86,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
     };
   }, [timeLeft, isTimerRunning]);
 
-  // Restart Timer for Next Question
+  // Restart Timer for Question
   const startTimerForQuestion = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setTimeLeft(30);
@@ -145,7 +98,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
 
   useEffect(() => {
     startTimerForQuestion();
-  }, [currentRiddleIdx]);
+  }, [currentRiddleIdx, selectedCategory]);
 
   const handleSelectAnswer = (opt: string) => {
     if (selectedAnswer !== null || timeLeft === 0) return;
@@ -157,8 +110,14 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
       addStars(20);
       playCorrect();
       playStarSound();
-      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-      setScore(prev => prev + 1);
+      try {
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+      } catch (e) {}
+
+      if (!solvedIds.includes(currentRiddle.id)) {
+        setSolvedIds(prev => [...prev, currentRiddle.id]);
+      }
+
       setFeedback({
         correct: true,
         message: `إجابة عبقرية صحيحة! 🎉 كسبت 20 نجمة ذهبية لذكائك وتفوقك! ⭐`
@@ -168,14 +127,23 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
       playWrong();
       setFeedback({
         correct: false,
-        message: `أوه! الإجابة غير صحيحة تماماً. الإجابة الصحيحة هي: (${currentRiddle.correct})`
+        message: `أوه! الإجابة غير صحيحة. الإجابة الصحيحة هي: (${currentRiddle.correct})`
       });
-      readRiddleAloud("أوه! إجابة خاطئة، اقرأ المعلومات لتعرف الإجابة الصحيحة!");
+      readRiddleAloud("أوه! إجابة غير صحيحة، اقرأ المعلومات لتعرف الإجابة الصحيحة!");
     }
   };
 
   const handleNextRiddle = () => {
-    setCurrentRiddleIdx(prev => (prev + 1) % riddles.length);
+    setCurrentRiddleIdx(prev => (prev + 1) % activeRiddles.length);
+  };
+
+  const handlePrevRiddle = () => {
+    setCurrentRiddleIdx(prev => (prev - 1 + activeRiddles.length) % activeRiddles.length);
+  };
+
+  const handleRandomRiddle = () => {
+    const randIdx = Math.floor(Math.random() * activeRiddles.length);
+    setCurrentRiddleIdx(randIdx);
   };
 
   const handleResetTimer = () => {
@@ -183,41 +151,81 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
   };
 
   return (
-    <div className="bg-[#FFFDF6] rounded-[32px] p-6 sm:p-8 border-4 border-[#1DD1A1] shadow-[0_8px_0_0_#10AC84]" id="sudan-quiz-container">
+    <div className="bg-[#FFFDF6] rounded-[32px] p-5 sm:p-8 border-4 border-[#1DD1A1] shadow-[0_8px_0_0_#10AC84] space-y-6" id="sudan-quiz-container" dir="rtl">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-4 border-emerald-50 pb-4">
+      {/* ========================================================================= */}
+      {/* 1. HEADER & TOP PROGRESS DOCK                                             */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-4 border-emerald-50 pb-4 gap-4">
         <div className="text-right">
           <div className="flex items-center gap-2">
             <span className="text-3xl select-none">🇸🇩</span>
-            <span className="bg-[#E28743] text-white text-[11px] font-black px-2.5 py-0.5 rounded-full border border-orange-700 shadow-sm">
-              ألغاز وحقائق سودانية
+            <span className="bg-[#E28743] text-white text-xs font-black px-3 py-1 rounded-full shadow-xs">
+              موسوعة الألغاز الـ 100 الكاملة
+            </span>
+            <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-2.5 py-0.5 rounded-full">
+              100 لغز وفزورة 🧠
             </span>
           </div>
-          <h2 className="text-3xl font-black text-[#10AC84] mt-1.5 flex items-center gap-2">
-            🧠 لغز وفزورة بلمسة سودانية أصيلة ⏱️
+          <h2 className="text-2xl sm:text-3xl font-black text-[#10AC84] mt-1.5 flex items-center gap-2">
+            <span>لغز وفزورة بلمسة سودانية أصيلة</span>
+            <span>⏱️</span>
           </h2>
-          <p className="text-gray-600 font-bold text-sm mt-1">
-            حل اللغز قبل انتهاء الوقت المخصص، واقرأ المعلومات الوفيرة جداً عن ملامح وتراث بلاد الكرم والخير!
+          <p className="text-gray-600 font-bold text-xs sm:text-sm mt-1">
+            حل الألغاز قبل انتهاء الوقت المخصص، واكتشف معلومات تاريخية ووطنية وفيرة جداً عن سوداننا الحبيب!
           </p>
         </div>
 
-        {/* Score & Stars indicators */}
-        <div className="flex items-center gap-3 mt-4 md:mt-0">
-          <div className="bg-white border-3 border-[#1DD1A1] px-4 py-1.5 rounded-2xl text-xs font-black shadow-sm text-[#10AC84]">
-            الألغاز المجابة: <span className="text-sm text-orange-500">{score} / {riddles.length}</span>
+        {/* Solved Progress Counter */}
+        <div className="flex items-center gap-3">
+          <div className="bg-white border-3 border-[#1DD1A1] px-4 py-2 rounded-2xl text-xs font-black shadow-xs text-[#10AC84] flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <span>الألغاز المحلولة:</span>
+            <span className="text-sm font-black text-orange-600">{solvedIds.length} / 100</span>
           </div>
+          <button
+            onClick={handleRandomRiddle}
+            className="p-2.5 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-300 rounded-2xl text-emerald-700 font-black text-xs flex items-center gap-1 cursor-pointer transition"
+            title="لغز عشوائي"
+          >
+            <Shuffle className="w-4 h-4" />
+            <span className="hidden sm:inline">لغز عشوائي 🎲</span>
+          </button>
         </div>
       </div>
 
-      {/* Grid: Riddle area on Left / Top, Information area on Right / Bottom */}
+      {/* ========================================================================= */}
+      {/* 2. CATEGORY PILLS BAR                                                     */}
+      {/* ========================================================================= */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => {
+              setSelectedCategory(cat.id);
+              setCurrentRiddleIdx(0);
+            }}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-black shrink-0 transition cursor-pointer border-2 ${
+              selectedCategory === cat.id
+                ? 'bg-[#10AC84] text-white border-[#10AC84] shadow-xs'
+                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. MAIN ARENA: RIDDLE CARD & KNOWLEDGE CHEST                              */}
+      {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* Riddle & Answer Area (3 columns) */}
         <div className="lg:col-span-3 flex flex-col justify-between">
-          <div className="bg-white p-6 rounded-[28px] border-4 border-[#1DD1A1] shadow-[0_6px_0_0_#10AC84] flex flex-col justify-between min-h-[420px]">
+          <div className="bg-white p-5 sm:p-6 rounded-[28px] border-4 border-[#1DD1A1] shadow-[0_6px_0_0_#10AC84] flex flex-col justify-between min-h-[440px]">
             
-            {/* Countdown timer & speaker bar */}
+            {/* Top Bar: Timer, Voice, Reset */}
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 font-black text-xs ${
                 timeLeft <= 10 ? 'bg-red-50 border-red-300 text-red-500 animate-pulse' : 'bg-emerald-50 border-emerald-300 text-emerald-600'
@@ -226,7 +234,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
                 <span>الوقت المتبقي: {timeLeft} ثانية</span>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => readRiddleAloud(currentRiddle.question)}
                   className="p-2 bg-emerald-50 hover:bg-emerald-100 border-2 border-[#1DD1A1] rounded-xl text-[#10AC84] cursor-pointer"
@@ -246,20 +254,27 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
               </div>
             </div>
 
-            {/* Riddle box */}
+            {/* Riddle Question & Category Tag */}
             <div className="text-right my-auto space-y-4">
               <div className="flex items-start gap-3">
                 <span className="text-5xl select-none shrink-0">{currentRiddle.emoji}</span>
                 <div>
-                  <span className="text-xs font-black text-[#10AC84] bg-emerald-50 px-2 py-0.5 rounded-md">اللغز رقم {currentRiddleIdx + 1}</span>
-                  <h3 className="text-lg font-black text-gray-800 leading-relaxed mt-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-black text-[#10AC84] bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                      اللغز رقم {currentRiddle.id} من 100
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
+                      {currentRiddle.categoryName}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-black text-gray-800 leading-relaxed mt-1">
                     {currentRiddle.question}
                   </h3>
                 </div>
               </div>
 
-              {/* Multiple choice options */}
-              <div className="grid grid-cols-1 gap-2.5 mt-6 pt-4 border-t border-gray-100">
+              {/* Multiple Choice Options */}
+              <div className="grid grid-cols-1 gap-2.5 mt-4 pt-4 border-t border-gray-100">
                 {currentRiddle.options.map((opt, idx) => {
                   const isSelected = selectedAnswer === opt;
                   const isCorrect = opt === currentRiddle.correct;
@@ -268,16 +283,15 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
                       key={idx}
                       onClick={() => handleSelectAnswer(opt)}
                       disabled={selectedAnswer !== null || timeLeft === 0}
-                      className={`w-full p-3.5 rounded-2xl border-3 text-right font-black text-sm transition-all cursor-pointer flex items-center justify-between ${
+                      className={`w-full p-3.5 rounded-2xl border-3 text-right font-black text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-between ${
                         selectedAnswer !== null
                           ? isCorrect
-                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-black shadow-sm'
+                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-black shadow-xs'
                             : isSelected
                               ? 'bg-red-50 border-red-400 text-red-800 font-bold opacity-80'
                               : 'bg-gray-50 border-gray-200 text-gray-400 opacity-60'
-                          : 'bg-white border-gray-200 hover:border-[#1DD1A1] text-gray-700 shadow-sm hover:translate-x-1'
+                          : 'bg-white border-gray-200 hover:border-[#1DD1A1] text-gray-700 shadow-xs hover:translate-x-1'
                       }`}
-                      id={`riddle-option-${idx}`}
                     >
                       <span>{opt}</span>
                       {selectedAnswer !== null && isCorrect && <span className="text-emerald-600 text-xs">إجابة صحيحة ✔️</span>}
@@ -288,15 +302,15 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
               </div>
             </div>
 
-            {/* Next buttons & feedback footer */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            {/* Navigation & Feedback Footer */}
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
               <AnimatePresence>
                 {feedback && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`p-3 rounded-xl border text-xs font-black text-center mb-3 ${
+                    className={`p-3 rounded-xl border text-xs font-black text-center ${
                       feedback.correct
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                         : 'bg-orange-50 border-orange-200 text-[#963E00]'
@@ -309,11 +323,18 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
 
               <div className="flex gap-2">
                 <button
-                  onClick={handleNextRiddle}
-                  className="flex-1 bg-[#1DD1A1] text-white border-4 border-[#10AC84] py-2.5 px-4 rounded-xl font-black text-xs cursor-pointer flex items-center justify-center gap-1 shadow-[0_3px_0_0_#10AC84] active:translate-y-0.5 active:shadow-none"
-                  id="next-riddle-btn"
+                  onClick={handlePrevRiddle}
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black text-xs rounded-xl flex items-center gap-1 cursor-pointer transition"
                 >
-                  اللغز التالي <ArrowLeft className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" />
+                  <span>السابق</span>
+                </button>
+                <button
+                  onClick={handleNextRiddle}
+                  className="flex-1 bg-[#1DD1A1] hover:bg-[#10AC84] text-white border-3 border-[#10AC84] py-2.5 px-4 rounded-xl font-black text-xs cursor-pointer flex items-center justify-center gap-1 shadow-xs transition active:translate-y-0.5"
+                >
+                  <span>اللغز التالي</span>
+                  <ArrowLeft className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -321,15 +342,15 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
           </div>
         </div>
 
-        {/* Abundant Information Panel (2 columns) */}
+        {/* Abundant Knowledge Panel (2 columns) */}
         <div className="lg:col-span-2">
-          <div className="bg-white p-5 rounded-[28px] border-4 border-amber-300 shadow-[0_6px_0_0_#D1B02B] min-h-[420px] flex flex-col justify-between">
+          <div className="bg-white p-5 rounded-[28px] border-4 border-amber-300 shadow-[0_6px_0_0_#D1B02B] min-h-[440px] flex flex-col justify-between">
             
             <div>
               <div className="flex items-center gap-2 border-b-2 border-amber-50 pb-2.5 mb-3">
                 <BookOpen className="w-5 h-5 text-amber-500" />
                 <h3 className="font-black text-sm text-[#963E00]">
-                  لوحة المعلومات الوفيرة جداً عن السودان 🇸🇩📚
+                  لوحة الكنز المعرفي السوداني 🇸🇩📚
                 </h3>
               </div>
 
@@ -340,9 +361,9 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="space-y-3.5 text-right"
+                    className="space-y-3 text-right"
                   >
-                    <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                    <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-500 fill-amber-200 shrink-0" />
                       <h4 className="font-black text-xs text-[#963E00] leading-tight">
                         {currentRiddle.infoTitle}
@@ -363,8 +384,8 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
                   >
                     <span className="text-5xl animate-bounce">🗝️📚</span>
                     <h4 className="font-black text-sm text-gray-700 mt-4">حل اللغز لكشف الكنز المعرفي!</h4>
-                    <p className="text-xs text-gray-400 font-bold mt-1.5 max-w-[200px] leading-relaxed">
-                      عندما تقوم باختيار إجابة اللغز، ستفتح هذه اللوحة لتكشف لك معلومات وفيرة جداً وتاريخية عن السودان الحبيب!
+                    <p className="text-xs text-gray-400 font-bold mt-1.5 max-w-[220px] leading-relaxed">
+                      عندما تقوم باختيار إجابة اللغز، ستفتح هذه اللوحة لتكشف لك معلومات تاريخية وجغرافية موثقة عن السودان الحبيب!
                     </p>
                   </motion.div>
                 )}
@@ -372,8 +393,8 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
             </div>
 
             {/* Little info footer advice */}
-            <div className="bg-amber-50 p-2.5 rounded-xl border border-amber-100 text-[10px] text-gray-500 text-center font-semibold mt-4">
-              💡 السودان غني جداً بالمعالم والكنوز الحضارية والآثار، وثقافة الأهل هي رمز الجود والكرم!
+            <div className="bg-amber-50 p-2.5 rounded-xl border border-amber-100 text-[10px] text-gray-600 text-center font-bold mt-4">
+              💡 السودان مهد الحضارات الإنسانية العريقة، وثقافة الأهل والأجداد عنوان للجود والنخوة والكرم!
             </div>
 
           </div>

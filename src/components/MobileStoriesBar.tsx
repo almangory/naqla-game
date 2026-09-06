@@ -24,7 +24,7 @@ export const MobileStoriesBar: React.FC<MobileStoriesBarProps> = ({
     { id: 'alphabet_train', title: 'قطار الحروف', emoji: '🚂', bgGradient: 'from-blue-500 to-indigo-600', isHot: true },
     { id: 'kids_coding', title: 'البرمجة', emoji: '🤖', bgGradient: 'from-purple-500 to-indigo-600', isHot: true },
     { id: 'pyramid_stacker', title: 'الأهرامات', emoji: '⛰️', bgGradient: 'from-amber-400 to-orange-500', isHot: true },
-    { id: 'sudan_rhythm', title: 'الإيقاعات', emoji: '🪘', bgGradient: 'from-orange-500 to-rose-500', isHot: true },
+    { id: 'sudan_rhythm', title: 'الأورغن', emoji: '🎹', bgGradient: 'from-purple-500 to-indigo-600', isHot: true },
     { id: 'drawing', title: 'المرسم', emoji: '🎨', bgGradient: 'from-pink-500 to-purple-500' },
     { id: 'science', title: 'العلوم', emoji: '🧪', bgGradient: 'from-cyan-400 to-blue-500' },
     { id: 'math', title: 'الحساب', emoji: '🧮', bgGradient: 'from-emerald-400 to-teal-500' },

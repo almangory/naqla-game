@@ -1,14 +1,15 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { Music, Play, RotateCcw, Volume2, Star, Trophy, Sparkles, Heart } from 'lucide-react';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useSpeech } from '../hooks/useSpeech';
+import SudanOrganKeyboard from './SudanOrganKeyboard';
 
 interface SudanRhythmGameProps {
   addStars: (amount: number) => void;
@@ -76,7 +77,7 @@ export default function SudanRhythmGame({ addStars }: SudanRhythmGameProps) {
   const { playPercussion, playStarSound, playClick, playCorrect, playWrong } = useSoundEffects();
   const { speak } = useSpeech();
 
-  const [activeTab, setActiveTab] = useState<'free' | 'challenge'>('free');
+  const [activeTab, setActiveTab] = useState<'organ' | 'free' | 'challenge'>('organ');
   const [activePad, setActivePad] = useState<string | null>(null);
   const [lastPlayedText, setLastPlayedText] = useState<string>('انقر على أي آلة لتبدأ عزف إيقاعك التراثي الجميل!');
 
@@ -174,126 +175,156 @@ export default function SudanRhythmGame({ addStars }: SudanRhythmGameProps) {
   };
 
   return (
-    <div className="bg-white rounded-[32px] p-6 sm:p-8 border-4 border-[#FF8E3C] shadow-[0_8px_0_0_#CC7130] max-w-4xl mx-auto" id="sudan-rhythm-game">
+    <div className="bg-white rounded-[32px] p-5 sm:p-8 border-4 border-[#6C5CE7] shadow-[0_8px_0_0_#4A3CB5] max-w-5xl mx-auto" id="sudan-rhythm-game">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center pb-4 mb-6 border-b-4 border-orange-100 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-center pb-4 mb-6 border-b-4 border-indigo-100 gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-gray-800 flex items-center gap-2">
-            <span>🪘🎶</span>
-            <span>مختبر الإيقاعات والطبول السودانية</span>
+            <span>🎹🪘</span>
+            <span>صالة الأورغن والإيقاعات السودانية</span>
           </h2>
-          <p className="text-xs sm:text-sm font-bold text-orange-950 mt-1">
-            تعرف على الدلوكة والطنبور والنقارة واعزف أحلى الأنغام التراثية بأصابعك الذكية! 🇸🇩✨
+          <p className="text-xs sm:text-sm font-bold text-indigo-950 mt-1">
+            اعزف الأورغن الموسيقي بالسلم الخماسي، وطبول الدلوكة والنقارة التراثية مع سمسم! 🇸🇩✨
           </p>
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="flex bg-orange-50 p-1.5 rounded-2xl border-2 border-orange-200 gap-2">
+        <div className="flex flex-wrap bg-indigo-50 p-1.5 rounded-2xl border-2 border-indigo-200 gap-2">
+          <button
+            onClick={() => {
+              setActiveTab('organ');
+              playClick();
+            }}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'organ'
+                ? 'bg-[#6C5CE7] text-white shadow-sm'
+                : 'text-gray-600 hover:bg-indigo-100'
+            }`}
+          >
+            <span>🎹</span>
+            <span>أورغن الأنغام للأطفال</span>
+          </button>
+
           <button
             onClick={() => {
               setActiveTab('free');
               playClick();
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'free'
                 ? 'bg-[#FF8E3C] text-white shadow-sm'
-                : 'text-gray-600 hover:bg-orange-100'
+                : 'text-gray-600 hover:bg-indigo-100'
             }`}
           >
-            🎨 العزف الحر
+            <span>🪘</span>
+            <span>طبول ودلوكة التراث</span>
           </button>
+
           <button
             onClick={() => {
               setActiveTab('challenge');
               playClick();
               startChallengeRound(1);
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'challenge'
-                ? 'bg-[#6C5CE7] text-white shadow-sm'
-                : 'text-gray-600 hover:bg-orange-100'
+                ? 'bg-[#2ECC71] text-white shadow-sm'
+                : 'text-gray-600 hover:bg-indigo-100'
             }`}
           >
-            🦉 تحدي إيقاع سمسم
+            <span>🦉</span>
+            <span>تحدي إيقاع سمسم</span>
           </button>
         </div>
       </div>
 
-      {/* Challenge Status Bar */}
-      {activeTab === 'challenge' && (
-        <div className="mb-6 p-4 rounded-2xl bg-violet-50 border-2 border-violet-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🦉🎵</span>
-            <div>
-              <p className="text-xs font-black text-violet-900">{challengeFeedback}</p>
-              <p className="text-[11px] text-gray-500 font-bold mt-0.5">
-                المرحلة: {challengeLevel} • إيقاعات صحيحة متتالية: {challengeScore}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => startChallengeRound(challengeLevel)}
-            disabled={isSimsimPlaying}
-            className="px-4 py-2 bg-white border-2 border-violet-300 text-violet-800 text-xs font-black rounded-xl hover:bg-violet-100 transition cursor-pointer disabled:opacity-50"
-          >
-            🔄 إعادة عزف نغمة سمسم
-          </button>
+      {/* TAB 1: Organ Keyboard */}
+      {activeTab === 'organ' && (
+        <div>
+          <SudanOrganKeyboard addStars={addStars} />
         </div>
       )}
 
-      {/* Main Drum Pads Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" id="drum-pads-container">
-        {INSTRUMENTS.map((pad) => {
-          const isTriggered = activePad === pad.id;
-          return (
-            <motion.button
-              key={pad.id}
-              onClick={() => triggerPad(pad.id)}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
-              animate={isTriggered ? { scale: [1, 1.08, 1], y: [0, -4, 0] } : {}}
-              className={`p-6 rounded-[28px] border-4 ${pad.color} ${pad.borderColor} ${pad.shadowColor} text-white text-right flex flex-col justify-between h-[160px] cursor-pointer transition-transform relative overflow-hidden group select-none`}
+      {/* TAB 2 & 3: Drums and Challenge */}
+      {(activeTab === 'free' || activeTab === 'challenge') && (
+        <div>
+          {/* Challenge Status Bar */}
+          {activeTab === 'challenge' && (
+            <div className="mb-6 p-4 rounded-2xl bg-violet-50 border-2 border-violet-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🦉🎵</span>
+                <div>
+                  <p className="text-xs font-black text-violet-900">{challengeFeedback}</p>
+                  <p className="text-[11px] text-gray-500 font-bold mt-0.5">
+                    المرحلة: {challengeLevel} • إيقاعات صحيحة متتالية: {challengeScore}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => startChallengeRound(challengeLevel)}
+                disabled={isSimsimPlaying}
+                className="px-4 py-2 bg-white border-2 border-violet-300 text-violet-800 text-xs font-black rounded-xl hover:bg-violet-100 transition cursor-pointer disabled:opacity-50"
+              >
+                🔄 إعادة عزف نغمة سمسم
+              </button>
+            </div>
+          )}
+
+          {/* Main Drum Pads Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" id="drum-pads-container">
+            {INSTRUMENTS.map((pad) => {
+              const isTriggered = activePad === pad.id;
+              return (
+                <motion.button
+                  key={pad.id}
+                  onClick={() => triggerPad(pad.id)}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={isTriggered ? { scale: [1, 1.08, 1], y: [0, -4, 0] } : {}}
+                  className={`p-6 rounded-[28px] border-4 ${pad.color} ${pad.borderColor} ${pad.shadowColor} text-white text-right flex flex-col justify-between h-[160px] cursor-pointer transition-transform relative overflow-hidden group select-none`}
+                >
+                  {/* Ripple Effect on active */}
+                  {isTriggered && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0.8 }}
+                      animate={{ scale: 2.5, opacity: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className="absolute inset-0 bg-white rounded-full pointer-events-none"
+                    />
+                  )}
+
+                  <div className="flex justify-between items-start">
+                    <span className="text-4xl group-hover:scale-125 transition-transform">{pad.emoji}</span>
+                    <span className="bg-black/20 px-2 py-0.5 rounded-full text-[10px] font-black">
+                      انقر للعزف 🎵
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-black leading-tight drop-shadow-sm">{pad.name}</h3>
+                    <p className="text-[11px] font-bold text-white/90 mt-1 line-clamp-1">{pad.subtext}</p>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Bottom Live Feedback Bar */}
+          <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🎶✨</span>
+              <span className="text-xs sm:text-sm font-black text-amber-950">{lastPlayedText}</span>
+            </div>
+            <button
+              onClick={() => speak("الإيقاعات التراثية السودانية تمتاز بالبهجة والروح الطيبة، كصوت الدلوكة التي تجمع الأهل والأحباب!")}
+              className="bg-white hover:bg-amber-100 p-2 rounded-xl border border-amber-300 text-amber-800 shrink-0 cursor-pointer flex items-center gap-1.5 text-xs font-bold"
             >
-              {/* Ripple Effect on active */}
-              {isTriggered && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0.8 }}
-                  animate={{ scale: 2.5, opacity: 0 }}
-                  transition={{ duration: 0.35 }}
-                  className="absolute inset-0 bg-white rounded-full pointer-events-none"
-                />
-              )}
-
-              <div className="flex justify-between items-start">
-                <span className="text-4xl group-hover:scale-125 transition-transform">{pad.emoji}</span>
-                <span className="bg-black/20 px-2 py-0.5 rounded-full text-[10px] font-black">
-                  انقر للعزف 🎵
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-base font-black leading-tight drop-shadow-sm">{pad.name}</h3>
-                <p className="text-[11px] font-bold text-white/90 mt-1 line-clamp-1">{pad.subtext}</p>
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* Bottom Live Feedback Bar */}
-      <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🎶✨</span>
-          <span className="text-xs sm:text-sm font-black text-amber-950">{lastPlayedText}</span>
+              <Volume2 className="w-4 h-4" />
+              <span className="hidden sm:inline">قصة الآلات التراثية</span>
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => speak("الإيقاعات التراثية السودانية تمتاز بالبهجة والروح الطيبة، كصوت الدلوكة التي تجمع الأهل والأحباب!")}
-          className="bg-white hover:bg-amber-100 p-2 rounded-xl border border-amber-300 text-amber-800 shrink-0 cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-        >
-          <Volume2 className="w-4 h-4" />
-          <span className="hidden sm:inline">قصة الآلات التراثية</span>
-        </button>
-      </div>
+      )}
     </div>
   );
 }
