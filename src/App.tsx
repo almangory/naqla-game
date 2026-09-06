@@ -76,12 +76,12 @@ const LoadingFallback = () => (
 );
 
 const BG_COLORS = [
-  { id: 'cream', name: 'البيج الدافئ 🍦', value: '#FFF9E6' },
-  { id: 'sky', name: 'الأزرق السماوي ☁️', value: '#E3F2FD' },
-  { id: 'lavender', name: 'الخزامى السحري 🦄', value: '#F3E5F5' },
-  { id: 'mint', name: 'النعناع المنعش 🍃', value: '#E8F5E9' },
-  { id: 'peach', name: 'الدراق اللطيف 🍑', value: '#FFE0B2' },
-  { id: 'rose', name: 'الوردي الجميل 🌸', value: '#FCE4EC' }
+  { id: 'lavender_3d', name: 'الخزامى الثلاثي 🔮', value: '#D6D5F2' },
+  { id: 'wave_cyan', name: 'الموج الهادئ 🌊', value: '#D8F2F7' },
+  { id: 'morning_light', name: 'الضياء الصباحي ☀️', value: '#FFF8E7' },
+  { id: 'magic_spark', name: 'النوال السحري ✨', value: '#ECE8FA' },
+  { id: 'golden_sands', name: 'الرمال الذهبية 🏜️', value: '#FBEED3' },
+  { id: 'royal_rose', name: 'الوردي الملكي 🌸', value: '#FCE6F1' }
 ];
 
 const AVAILABLE_STICKERS = [
@@ -118,9 +118,9 @@ export default function App() {
 
   const [isVisualFullscreen, setIsVisualFullscreen] = useState(false);
 
-  // Background and Sticker settings states
+  // Background and Sticker settings states (Default to Lavender 3D Mockup Theme)
   const [bgColor, setBgColor] = useState<string>(() => {
-    return localStorage.getItem('simsim_kids_bg_color') || 'cream';
+    return localStorage.getItem('simsim_kids_bg_color') || 'lavender_3d';
   });
 
   const [selectedStickers, setSelectedStickers] = useState<string[]>(() => {
@@ -578,22 +578,25 @@ export default function App() {
 
   const sudanHeritageGames = menuItems.filter(item => item.category === 'sudan' || item.id === 'sudan_rhythm');
 
-  const currentBgColor = BG_COLORS.find(c => c.id === bgColor)?.value || '#FFF9E6';
+  const currentBgColor = BG_COLORS.find(c => c.id === bgColor)?.value || '#D6D5F2';
+  const isHexTheme = bgColor === 'lavender_3d' || bgColor === 'magic_spark';
 
   return (
     <div 
-      className="min-h-screen text-[#4D4D4D] font-sans antialiased flex flex-col transition-all duration-500 selection:bg-amber-300" 
+      className={`min-h-screen text-[#26214B] font-sans antialiased flex flex-col transition-all duration-500 selection:bg-purple-300 ${
+        isHexTheme ? 'bg-hex-ambient' : ''
+      }`} 
       dir="rtl" 
       id="app-root"
       style={{ backgroundColor: currentBgColor }}
     >
       {/* ========================================================================= */}
-      {/* 1. TOP GLOBAL APP BAR & FLOATING HUD (WORLD-CLASS KIDS THEME)            */}
+      {/* 1. TOP GLOBAL APP BAR & FLOATING HUD (WORLD-CLASS 3D CLAYMORPHIC THEME)  */}
       {/* ========================================================================= */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b-4 border-amber-300 shadow-[0_6px_20px_rgba(255,217,61,0.25)] px-3 sm:px-6 py-2.5 sm:py-3 transition-all">
+      <header className="sticky top-0 z-30 bg-[#EAE8FB]/80 backdrop-blur-2xl border-b border-white/80 shadow-[0_8px_30px_rgba(108,92,231,0.08)] px-3 sm:px-6 py-2 sm:py-2.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           
-          {/* Brand Logo & Friendly Mascot */}
+          {/* Brand Logo & Friendly Mascot (matching media_1788709434478.jpg) */}
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             <button
               onClick={() => {
@@ -604,30 +607,30 @@ export default function App() {
               className="flex items-center gap-2.5 cursor-pointer group text-right"
               id="header-logo-btn"
             >
-              <div className="w-11 h-11 sm:w-13 sm:h-13 bg-white rounded-2xl border-3 border-amber-300 shadow-[0_4px_0_0_#D97706] flex items-center justify-center shrink-0 group-hover:scale-105 group-active:scale-95 transition-transform overflow-hidden p-0.5">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 bg-white/95 rounded-2xl border-2 border-white shadow-[0_4px_14px_rgba(108,92,231,0.18)] flex items-center justify-center shrink-0 group-hover:scale-105 group-active:scale-95 transition-transform overflow-hidden p-1">
                 <img 
                   src="/favicon.png" 
                   alt="NAQLA Games Logo" 
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-contain drop-shadow-xs"
                 />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h1 className="text-base sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-1">
+                  <h1 className="text-base sm:text-2xl font-black text-[#26214B] tracking-tight flex items-center gap-1.5">
                     <span>ألعاب نقلة</span>
-                    <span className="text-purple-600 font-black text-xs sm:text-sm">NAQLA</span>
-                    <span className="text-amber-500 text-xs sm:text-base">🎮✨</span>
+                    <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent font-black text-xs sm:text-base">NAQLA</span>
+                    <span className="text-amber-500 text-xs sm:text-base">🎮</span>
                   </h1>
                 </div>
-                <p className="text-[10px] sm:text-xs font-bold text-indigo-900 line-clamp-1 hidden sm:block">
-                  منصة الألعاب الإلكترونية التفاعلية لجميع المراحل
+                <p className="text-[10px] sm:text-xs font-bold text-[#635B9F] line-clamp-1 hidden sm:block">
+                  منصة الألعاب الإلكترونية التفاعلية لعموم المراحل
                 </p>
               </div>
             </button>
           </div>
 
-          {/* Center / Right Controls: Stats, Sound Toggle, and Mobile Simulator Switcher */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          {/* Center / Right Controls: Frosted Claymorphic Pills HUD */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             
             {/* Device Mode Switcher (Desktop Bento vs Mobile Parallel Experience) */}
             <button
@@ -635,10 +638,10 @@ export default function App() {
                 setIsMobileSimulator(prev => !prev);
                 playClick();
               }}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-2xl text-[11px] sm:text-xs font-black border-2 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 ${
+              className={`clay-pill px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                 isMobileSimulator 
-                  ? 'bg-purple-600 text-white border-purple-800 shadow-[0_3px_0_0_#4c1d95]' 
-                  : 'bg-white text-gray-800 border-amber-300 hover:bg-amber-50'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-transparent shadow-[0_4px_14px_rgba(108,92,231,0.35)]' 
+                  : 'text-[#26214B] hover:bg-white'
               }`}
               title="تبديل طريقة العرض: نمط الجوال الفائق أو النمط المكتبي"
               id="device-mode-toggle-btn"
@@ -650,7 +653,7 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600" />
+                  <Monitor className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" />
                   <span className="hidden xs:inline">نمط الحاسوب 💻</span>
                 </>
               )}
@@ -660,7 +663,7 @@ export default function App() {
             {!isAppInstalled ? (
               <button
                 onClick={handleInstallApp}
-                className="px-2.5 sm:px-3.5 py-1.5 rounded-2xl text-[11px] sm:text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-2 border-emerald-700 shadow-[0_3px_0_0_#065f46] flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                className="clay-pill px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-white/60 shadow-[0_4px_14px_rgba(16,185,129,0.3)] flex items-center gap-1.5 cursor-pointer active:scale-95"
                 title="تثبيت التطبيق على هاتفك أو حاسوبك للوصول السريع"
                 id="install-pwa-btn"
               >
@@ -668,7 +671,7 @@ export default function App() {
                 <span className="hidden sm:inline">تثبيت التطبيق</span>
               </button>
             ) : (
-              <span className="hidden md:flex items-center gap-1 text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-1 rounded-xl">
+              <span className="hidden md:flex items-center gap-1 text-[10px] font-black text-emerald-800 bg-emerald-100/80 border border-emerald-300 px-2 py-1 rounded-full">
                 <span>✅</span>
                 <span>تطبيق مثبت</span>
               </span>
@@ -680,36 +683,36 @@ export default function App() {
                 toggleMute();
                 playClick();
               }}
-              className="w-9 h-9 sm:w-11 sm:h-11 bg-white hover:bg-amber-50 border-2 sm:border-3 border-[#FF8E3C] rounded-2xl flex items-center justify-center text-gray-700 shadow-xs cursor-pointer transition-transform active:scale-90"
+              className="clay-pill w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-gray-700 cursor-pointer active:scale-90"
               title={isMuted ? 'تشغيل المؤثرات الصوتية' : 'كتم الصوت'}
               id="sound-toggle-btn"
             >
-              {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />}
+              {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />}
             </button>
 
             {/* Streak Counter Pill */}
             <div 
-              className="bg-orange-50 text-orange-700 border-2 border-[#FF8E3C] px-2.5 sm:px-3 py-1 rounded-2xl flex items-center gap-1 text-xs font-black shadow-xs shrink-0"
+              className="clay-pill px-2.5 sm:px-3 py-1.5 flex items-center gap-1 text-xs font-black text-[#C2410C] border-orange-200/90 shadow-[0_4px_14px_rgba(255,142,60,0.18)] shrink-0"
               title={`أيام الحماسة المتواصلة: ${stats.streak}`}
             >
               <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-orange-500 text-orange-500" />
               <span>{stats.streak}</span>
             </div>
 
-            {/* Stars Score Badge */}
+            {/* Stars Score Badge (Frosted Cyan Pill matching mockup) */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-2xl border-2 sm:border-3 border-[#4ECDC4] flex items-center gap-1.5 shadow-xs shrink-0"
+              className="clay-pill px-3 sm:px-4 py-1.5 flex items-center gap-1.5 border-teal-200/90 shadow-[0_4px_14px_rgba(45,206,196,0.2)] cursor-pointer"
               id="header-stars-badge"
             >
-              <span className="text-base sm:text-xl select-none">⭐</span>
-              <span className="text-sm sm:text-xl font-black text-[#2D8E87]">{stats.stars}</span>
+              <span className="text-base sm:text-lg select-none">⭐</span>
+              <span className="text-sm sm:text-base font-black text-[#1D7D76]">{stats.stars}</span>
             </motion.div>
 
             {/* Avatar / Level Indicator */}
             <div 
-              className="relative cursor-pointer select-none"
+              className="relative cursor-pointer select-none group"
               onClick={() => {
                 if (isMobileSimulator) setMobileNavSection('rewards');
                 else setActiveTab('rewards');
@@ -717,10 +720,12 @@ export default function App() {
               }}
               title="لوحة الأوسمة والمستوى"
             >
-              <div className="w-9 h-9 sm:w-11 sm:h-11 bg-white border-2 sm:border-3 border-[#FF6B6B] rounded-2xl flex items-center justify-center shadow-xs text-xl sm:text-2xl">
-                👦
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl p-0.5 bg-gradient-to-tr from-[#FF7675] via-[#FFD93D] to-[#4ECDC4] shadow-md group-hover:scale-105 transition-transform">
+                <div className="w-full h-full bg-white/95 rounded-[14px] flex items-center justify-center text-xl sm:text-2xl shadow-inner">
+                  👦
+                </div>
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-[#FF6B6B] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+              <span className="absolute -bottom-1 -right-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
                 {stats.level}
               </span>
             </div>
@@ -1160,49 +1165,43 @@ export default function App() {
               /* ========================================================================= */
               <div className="max-w-7xl mx-auto w-full p-4 sm:p-8 space-y-8 animate-fade-in" id="desktop-bento-portal">
                 
-                {/* 1. Top Bento Row: Quick Stats + Customizer Station + Interactive Stickers Wall */}
+                {/* 1. Top Bento Row: 3 Claymorphic Cards (matching media_1788709434478.jpg) */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   
-                  {/* Card 1: Kid Profile & Explorer Level */}
-                  <div className="bg-white p-6 rounded-[32px] border-4 border-[#FF8E3C] shadow-[0_8px_0_0_#CC7130] flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-4 mb-3">
-                        <div className="w-16 h-16 bg-gradient-to-tr from-[#FFD93D] to-[#FF8E3C] rounded-2xl flex items-center justify-center text-3xl shadow-inner select-none border-3 border-white shrink-0">
-                          👦
-                        </div>
-                        <div>
-                          <span className="text-xs font-black text-[#FF8E3C] bg-orange-50 px-2.5 py-0.5 rounded-full">
-                            المستكشف الذكي 🌟
-                          </span>
-                          <h3 className="text-xl font-black text-gray-800 mt-1">المستوى {stats.level}</h3>
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="w-full h-6 bg-gray-100 rounded-full overflow-hidden border-2 border-gray-200 mt-2 relative">
-                        <motion.div 
-                          className="bg-[#FF8E3C] h-full rounded-full transition-all duration-500"
-                          style={{ width: `${(stats.stars % 50) * 2}%` }}
+                  {/* Card 1: 3D Golden Naqla Emblem Card */}
+                  <motion.div 
+                    whileHover={{ y: -4 }}
+                    className="clay-card rounded-[32px] p-6 flex flex-col items-center justify-center relative overflow-hidden group min-h-[220px]"
+                  >
+                    <div className="w-24 h-24 relative flex items-center justify-center mb-1 group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-20 h-20 rounded-3xl p-1 shadow-[0_10px_24px_rgba(212,175,55,0.35)] flex items-center justify-center bg-gradient-to-tr from-[#D4AF37] via-[#FFD700] to-[#FFF4BD] border-2 border-white/80">
+                        <img 
+                          src="/favicon.png" 
+                          alt="Naqla 3D Golden Emblem" 
+                          className="w-16 h-16 object-contain drop-shadow-md filter brightness-110" 
                         />
-                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-gray-800">
-                          {(stats.stars % 50) * 2}% نحو المستوى {stats.level + 1}
-                        </span>
                       </div>
                     </div>
+                    <h3 className="text-2xl font-black tracking-widest bg-gradient-to-r from-[#B38728] via-[#E5C158] to-[#DAA520] bg-clip-text text-transparent drop-shadow-xs">
+                      NAQLA
+                    </h3>
+                    <p className="text-[11px] font-bold text-[#635B9F] mt-1">
+                      منصة الألعاب الإلكترونية التفاعلية
+                    </p>
+                  </motion.div>
 
-                    <div className="mt-4 flex items-center justify-between text-xs font-bold text-gray-500 border-t pt-3">
-                      <span>إجمالي النجوم: ⭐ {stats.stars}</span>
-                      <span>نشاط متواصل: 🔥 {stats.streak} أيام</span>
-                    </div>
-                  </div>
-
-                  {/* Card 2: Background Colors Customizer */}
-                  <div className="bg-white p-6 rounded-[32px] border-4 border-[#6C5CE7] shadow-[0_8px_0_0_#5044AB]">
+                  {/* Card 2: Theme / Atmosphere Customizer */}
+                  <motion.div 
+                    whileHover={{ y: -4 }}
+                    className="clay-card rounded-[32px] p-6 flex flex-col justify-between min-h-[220px]"
+                  >
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">🎨</span>
-                      <h3 className="text-base font-black text-[#5044AB]">لون خلفية الأكاديمية:</h3>
+                      <div className="w-8 h-8 rounded-xl bg-purple-100/80 flex items-center justify-center text-lg border border-purple-200">
+                        🎨
+                      </div>
+                      <h3 className="text-base font-black text-[#26214B]">لون خلفية المنصة:</h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2.5">
                       {BG_COLORS.map((c) => (
                         <button
                           key={c.id}
@@ -1210,116 +1209,148 @@ export default function App() {
                             setBgColor(c.id);
                             playClick();
                           }}
-                          className={`p-2 rounded-xl text-xs font-bold border-2 transition-all flex items-center gap-2 cursor-pointer ${
+                          className={`clay-pill px-3 py-2 text-xs font-black flex items-center gap-2 cursor-pointer transition-all ${
                             bgColor === c.id
-                              ? 'border-[#6C5CE7] bg-purple-50 font-black shadow-xs'
-                              : 'border-gray-200 bg-gray-50 hover:bg-white text-gray-700'
+                              ? 'border-purple-400 bg-purple-100/90 text-purple-950 shadow-[0_4px_12px_rgba(108,92,231,0.25)]'
+                              : 'text-gray-700 hover:bg-white/90'
                           }`}
                         >
-                          <span className="w-4 h-4 rounded-full border border-gray-300 shrink-0" style={{ backgroundColor: c.value }} />
-                          <span className="text-[11px] truncate">{c.name}</span>
+                          <span 
+                            className="w-3.5 h-3.5 rounded-full border border-white/80 shadow-xs shrink-0" 
+                            style={{ backgroundColor: c.value }} 
+                          />
+                          <span className="truncate">{c.name}</span>
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
 
-                  {/* Card 3: Interactive Sticker Board */}
-                  <div className="bg-white p-6 rounded-[32px] border-4 border-[#4ECDC4] shadow-[0_8px_0_0_#3DA199] flex flex-col justify-between">
+                  {/* Card 3: Kid Profile & Explorer Level */}
+                  <motion.div 
+                    whileHover={{ y: -4 }}
+                    className="clay-card rounded-[32px] p-6 flex flex-col justify-between min-h-[220px]"
+                  >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">✨</span>
-                          <h3 className="text-base font-black text-[#2D8E87]">جدار ملصقاتي:</h3>
+                      <div className="flex items-center justify-between gap-4 mb-3">
+                        <div>
+                          <span className="clay-pill px-3 py-0.5 text-[11px] font-black text-amber-800 border-amber-200/90 shadow-xs inline-flex items-center gap-1">
+                            <span>المستكشف الذكي</span>
+                            <span>⭐</span>
+                          </span>
+                          <h3 className="text-2xl font-black text-[#26214B] mt-1.5">
+                            المستوى {stats.level}
+                          </h3>
                         </div>
-                        <span className="text-[10px] font-bold text-gray-400">انقر للمفاجآت!</span>
+                        <div className="w-15 h-15 rounded-2xl p-1 bg-gradient-to-tr from-[#FF7675] via-[#FFD93D] to-[#4ECDC4] shadow-md flex items-center justify-center shrink-0">
+                          <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center text-3xl shadow-inner">
+                            👦
+                          </div>
+                        </div>
                       </div>
-                      <div className="border-2 border-dashed border-[#4ECDC4]/40 bg-teal-50/30 min-h-[95px] rounded-2xl p-2 flex flex-wrap items-center justify-center gap-2">
-                        {selectedStickers.map((stickerId) => {
-                          const stk = AVAILABLE_STICKERS.find(s => s.id === stickerId);
-                          if (!stk) return null;
-                          return (
-                            <motion.button
-                              key={stk.id}
-                              onClick={handleStickerClick}
-                              whileHover={{ scale: 1.25, rotate: [0, 8, -8, 0] }}
-                              whileTap={{ scale: 0.9 }}
-                              className="text-3xl p-1 cursor-pointer select-none"
-                              title={stk.name}
-                            >
-                              {stk.emoji}
-                            </motion.button>
-                          );
-                        })}
+
+                      {/* Candy Gradient Progress Bar */}
+                      <div className="w-full h-6 bg-white/70 rounded-full overflow-hidden border border-white/90 shadow-inner mt-2 relative p-0.5">
+                        <motion.div 
+                          className="h-full rounded-full bg-gradient-to-r from-[#2ECC71] via-[#4ECDC4] to-[#FF7675] shadow-xs"
+                          style={{ width: `${Math.max(12, Math.min(100, (stats.stars % 50) * 2))}%` }}
+                          transition={{ duration: 0.5 }}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-gray-800 drop-shadow-xs">
+                          {Math.min(100, (stats.stars % 50) * 2)}% نحو المستوى {stats.level + 1}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="text-center mt-2">
-                      <span className="text-[10px] font-bold text-[#2D8E87]">
-                        💡 انقر على أي ملصق لإطلاق مفاجآت ورقية ملونة!
-                      </span>
+                    <div className="mt-4 flex items-center justify-between text-xs font-black text-[#635B9F] border-t border-white/60 pt-3">
+                      <span>إجمالي النجوم: ⭐ {stats.stars}</span>
+                      <span>النشاط المتواصل: 🔥 {stats.streak} أيام</span>
+                    </div>
+                  </motion.div>
+
+                </div>
+
+                {/* 2. Central Hero Ribbon: 3D Emblem & 100 Games Academy Master Ribbon */}
+                <div className="clay-card rounded-[36px] p-5 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                  
+                  {/* Right: Academy Title & Highlights */}
+                  <div className="flex items-center gap-4 text-right order-1 md:order-3">
+                    <div className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl flex items-center justify-center text-3xl shadow-md border-2 border-white shrink-0 animate-bounce">
+                      🌟
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 clay-pill px-3 py-0.5 text-[11px] font-black text-amber-900 border-amber-200 shadow-xs mb-1">
+                        <span>موسوعة المئة لعبة العالمية</span>
+                        <span>🌟</span>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black text-[#26214B]">
+                        أكاديمية الـ 100 لعبة ومنهاج التميز 🚀
+                      </h3>
+                      <p className="text-[11px] sm:text-xs font-bold text-[#635B9F] max-w-md line-clamp-1 mt-0.5">
+                        قطار الحروف الأبجدية، سباق سيارات تجميع الكلمات، محاكاة العلوم، الرياضيات، والبرمجة!
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Center: Iconic 3D NAQLA Emblem (from media_1788709434478.jpg) */}
+                  <div 
+                    onClick={() => {
+                      setActiveTab('games_100_hub');
+                      playStarSound();
+                    }}
+                    className="flex flex-col items-center justify-center cursor-pointer group order-2 shrink-0 py-1"
+                    title="انقر لفتح موسوعة الـ 100 لعبة"
+                  >
+                    <div className="w-44 sm:w-52 h-20 sm:h-24 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                      <img 
+                        src="/naqla-games-logo.jpg" 
+                        alt="NAQLA 3D Emblem" 
+                        className="max-h-full object-contain drop-shadow-[0_8px_18px_rgba(108,92,231,0.25)]" 
+                      />
+                    </div>
+                    <span className="text-[10px] font-black tracking-wider text-[#635B9F] mt-1">
+                      منصة الألعاب الإلكترونية التفاعلية
+                    </span>
+                  </div>
+
+                  {/* Left: Quick Launch & 100/100 Pill */}
+                  <div className="flex items-center gap-3 order-3 md:order-1 shrink-0">
+                    <button
+                      onClick={() => {
+                        setActiveTab('games_100_hub');
+                        playStarSound();
+                      }}
+                      className="clay-btn-coral px-5 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 cursor-pointer shadow-md active:scale-95"
+                    >
+                      <span>استكشف الأكاديمية</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="clay-pill px-3.5 py-2 text-center text-xs font-black text-[#26214B]">
+                      <span className="block text-sm font-black text-indigo-900">100 / 100</span>
+                      <span className="text-[9px] text-gray-500 font-bold">لعبة منجزة</span>
                     </div>
                   </div>
 
                 </div>
 
-                {/* 🌟 100 Educational Games Academy Hub Master Banner */}
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-[32px] p-6 sm:p-7 text-white border-4 border-amber-300 shadow-[0_10px_0_0_#C2410C] flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer"
-                  onClick={() => {
-                    setActiveTab('games_100_hub');
-                    playStarSound();
-                  }}
-                >
-                  <div className="flex items-center gap-5 text-right">
-                    <div className="w-18 h-18 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl border-3 border-white/60 shadow-inner shrink-0 animate-bounce">
-                      🌟
-                    </div>
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 bg-yellow-300 text-yellow-950 px-3 py-0.5 rounded-full text-xs font-black shadow-xs mb-1.5">
-                        <Sparkles className="w-3.5 h-3.5 fill-current" />
-                        <span>موسوعة المئة لعبة التفاعلية الشاملة</span>
-                      </div>
-                      <h3 className="text-xl sm:text-2xl font-black">
-                        أكاديمية الـ 100 لعبة: منهاج الأبطال العالمي 🚀
-                      </h3>
-                      <p className="text-xs sm:text-sm font-bold text-white/90 mt-1">
-                        قطار الحروف الأبجدية، سباق سيارات تجميع الكلمات، محاكاة العلوم، الرياضيات، وبرمجة الروبوتات!
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-3">
-                    <div className="text-center bg-black/20 backdrop-blur-xs px-4 py-2 rounded-2xl border border-white/30 hidden sm:block">
-                      <span className="text-xl font-black block">100 / 100</span>
-                      <span className="text-[10px] text-white/80 font-bold">لعبة متكاملة</span>
-                    </div>
-                    <button
-                      className="px-6 py-3.5 bg-white hover:bg-yellow-100 text-orange-700 font-black text-sm rounded-2xl border-3 border-white shadow-md flex items-center gap-2 cursor-pointer transition active:scale-95"
-                    >
-                      <span>تصفح الأكاديمية بالكامل</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </motion.div>
-
-                {/* 3. Games Bento Grid with Quick Filter Chips */}
+                {/* 3. Category Filter Chips & Stylish Arabic Header (matching mockup bottom) */}
                 <div>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-                    <h3 className="text-2xl font-black text-gray-800 flex items-center gap-2">
-                      <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
-                      <span>اختر مغامرتك وابدأ التعلم:</span>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    
+                    {/* Right: Stylish 3D Title */}
+                    <h3 className="text-2xl sm:text-3xl font-black text-[#26214B] flex items-center gap-2 drop-shadow-xs">
+                      <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
+                      <span>اختر مغامرتك وابدأ 🧭</span>
                     </h3>
 
-                    {/* Filter Pills */}
-                    <div className="flex flex-wrap gap-1.5 bg-white p-1.5 rounded-2xl border-2 border-amber-200 shadow-xs">
+                    {/* Left: 3D Rounded Claymorphic Pills */}
+                    <div className="flex flex-wrap gap-2">
                       {[
-                        { id: 'all', label: '🌟 كل الألعاب' },
-                        { id: 'sudan', label: '🇸🇩 أمجاد السودان' },
-                        { id: 'science', label: '🧪 علوم وحساب' },
-                        { id: 'languages', label: '📚 لغات وحروف' },
-                        { id: 'arts', label: '🎨 فنون وموسيقى' },
-                        { id: 'brain', label: '🦉 أذكياء نقلة' },
+                        { id: 'all', label: '🌟 كل الألعاب', color: 'bg-amber-100 text-amber-950 border-amber-300' },
+                        { id: 'sudan', label: '🇸🇩 أمجاد السودان', color: 'bg-emerald-100 text-emerald-950 border-emerald-300' },
+                        { id: 'science', label: '🧪 علوم وحساب', color: 'bg-cyan-100 text-cyan-950 border-cyan-300' },
+                        { id: 'languages', label: '📚 لغات وحروف', color: 'bg-purple-100 text-purple-950 border-purple-300' },
+                        { id: 'arts', label: '🎨 فنون وموسيقى', color: 'bg-rose-100 text-rose-950 border-rose-300' },
+                        { id: 'brain', label: '🦉 أذكياء نقلة', color: 'bg-indigo-100 text-indigo-950 border-indigo-300' },
                       ].map((tab) => (
                         <button
                           key={tab.id}
@@ -1327,10 +1358,10 @@ export default function App() {
                             setActiveFilter(tab.id as any);
                             playClick();
                           }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                          className={`clay-pill px-4 py-2 text-xs font-black cursor-pointer transition-all ${
                             activeFilter === tab.id
-                              ? 'bg-[#FFD93D] text-gray-900 shadow-xs font-black'
-                              : 'text-gray-600 hover:bg-amber-50'
+                              ? 'clay-pill-active scale-105'
+                              : 'text-[#26214B] hover:bg-white'
                           }`}
                         >
                           {tab.label}
@@ -1339,7 +1370,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* World-Class Bento Grid */}
+                  {/* 4. World-Class Claymorphic Bento Games Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredMenuItems.map((item) => (
                       <motion.button
@@ -1350,7 +1381,7 @@ export default function App() {
                         }}
                         whileHover={{ y: -6, scale: 1.01 }}
                         whileTap={{ y: 2, scale: 0.98 }}
-                        className={`group text-right p-6 rounded-[32px] border-4 bg-white flex flex-col justify-between h-[210px] cursor-pointer relative overflow-hidden transition-all shadow-[0_8px_0_0_#E0E0E0] hover:shadow-[0_12px_0_0_#E0E0E0] ${item.borderColor}`}
+                        className="clay-card group text-right p-6 rounded-[32px] flex flex-col justify-between h-[215px] cursor-pointer relative overflow-hidden transition-all duration-300 hover:shadow-[0_16px_36px_rgba(108,92,231,0.18)]"
                         id={`bento-card-${item.id}`}
                       >
                         <div>
@@ -1360,30 +1391,30 @@ export default function App() {
                             </span>
                             <div className="flex items-center gap-1.5">
                               {item.isNew && (
-                                <span className="bg-red-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-xs animate-pulse">
+                                <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-xs animate-pulse">
                                   جديد 🔥
                                 </span>
                               )}
-                              <span className="bg-amber-100 text-amber-900 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-amber-200">
+                              <span className="clay-pill px-2.5 py-0.5 text-[11px] font-black text-indigo-900 border-indigo-100">
                                 {item.badge}
                               </span>
                             </div>
                           </div>
 
-                          <h4 className="text-lg font-black text-gray-800 group-hover:text-[#FF8E3C] transition-colors">
+                          <h4 className="text-base sm:text-lg font-black text-[#26214B] group-hover:text-purple-700 transition-colors">
                             {item.label.substring(item.label.indexOf(' ') + 1)}
                           </h4>
-                          <p className="text-gray-500 text-xs font-bold mt-1.5 line-clamp-2 leading-relaxed">
+                          <p className="text-[#635B9F] text-xs font-bold mt-1.5 line-clamp-2 leading-relaxed">
                             {item.desc}
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-2">
-                          <span className="text-xs font-black text-[#4ECDC4] flex items-center gap-1 group-hover:translate-x-[-4px] transition-transform">
+                        <div className="flex items-center justify-between border-t border-white/60 pt-3 mt-2">
+                          <span className="text-xs font-black text-teal-700 flex items-center gap-1 group-hover:translate-x-[-4px] transition-transform">
                             <span>ابدأ اللعبة الآن</span>
                             <span>👈</span>
                           </span>
-                          <span className="text-xs text-amber-500">⭐ +10</span>
+                          <span className="clay-pill px-2 py-0.5 text-[10px] font-black text-amber-600">⭐ +10</span>
                         </div>
                       </motion.button>
                     ))}
@@ -1394,7 +1425,7 @@ export default function App() {
                 <div className="flex justify-center pt-8">
                   <button
                     onClick={handleBackClick}
-                    className="px-6 py-3 bg-[#FF6B6B] hover:bg-red-500 text-white font-black text-sm rounded-2xl border-4 border-red-700 shadow-[0_6px_0_0_#990000] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+                    className="clay-btn-coral px-7 py-3 rounded-2xl text-white font-black text-sm flex items-center gap-2 cursor-pointer shadow-lg active:scale-95"
                     id="exit-academy-btn"
                   >
                     🚪 مغادرة الأكاديمية

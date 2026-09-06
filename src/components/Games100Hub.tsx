@@ -88,7 +88,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
       {/* ========================================================================= */}
       {/* 1. HERO BANNER: 100 EDUCATIONAL GAMES HUB                                 */}
       {/* ========================================================================= */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-[36px] p-6 sm:p-8 text-white border-4 border-amber-300 shadow-[0_12px_0_0_#C2410C] relative overflow-hidden">
+      <div className="clay-card rounded-[36px] p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white border-2 border-white/80 shadow-[0_16px_40px_rgba(108,92,231,0.25)]">
         
         {/* Background Decorative Emojis */}
         <div className="absolute top-2 left-6 text-5xl opacity-20 select-none animate-pulse">
@@ -100,7 +100,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-right max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-xs px-3.5 py-1 rounded-full text-xs font-black mb-3 border border-white/30">
+            <div className="inline-flex items-center gap-2 clay-pill bg-white/20 backdrop-blur-md px-4 py-1 text-xs font-black mb-3 border-white/40 text-yellow-300">
               <Sparkles className="w-4 h-4 text-yellow-300" />
               <span>موسوعة ألعاب نقلة الذكية العالمية • 100 لعبة تعليمية تفاعلية</span>
             </div>
@@ -115,16 +115,16 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
           </div>
 
           {/* Quick Hub Stats Card */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border-3 border-amber-200 text-gray-800 shadow-xl flex items-center gap-4 shrink-0">
-            <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl border-2 border-amber-300 select-none">
+          <div className="clay-card rounded-[28px] p-4 sm:p-5 text-[#26214B] shadow-xl flex items-center gap-4 shrink-0 bg-white/90">
+            <div className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl flex items-center justify-center text-3xl border-2 border-white shadow-md select-none">
               🏆
             </div>
             <div>
-              <span className="text-[11px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-full">
+              <span className="clay-pill px-2.5 py-0.5 text-[10px] font-black text-amber-900 border-amber-200">
                 مكتبة الألعاب التفاعلية
               </span>
-              <h3 className="text-2xl font-black text-gray-900 mt-0.5">100 / 100</h3>
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+              <h3 className="text-2xl font-black text-[#26214B] mt-1">100 / 100</h3>
+              <span className="text-xs font-black text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>جاهزة للعب الفوري</span>
               </span>
@@ -137,7 +137,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
       {/* ========================================================================= */}
       {/* 2. SEARCH & FILTER DOCK                                                   */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl p-5 border-4 border-amber-200 shadow-[0_6px_0_0_#F59E0B] space-y-4">
+      <div className="clay-card rounded-[32px] p-5 space-y-4">
         
         {/* Search Bar & Difficulty */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -147,7 +147,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ابحث عن لعبة، مهارة، أو موضوع (مثال: قطار، كيمياء، سيارة، كوش، جمع)..."
-              className="w-full bg-gray-50 border-2 border-gray-300 rounded-2xl py-3 pr-11 pl-4 text-xs sm:text-sm font-black text-gray-800 focus:outline-none focus:border-[#FF8E3C] focus:bg-white transition"
+              className="w-full bg-white/80 border-2 border-purple-100 rounded-2xl py-3 pr-11 pl-4 text-xs sm:text-sm font-black text-[#26214B] focus:outline-none focus:border-purple-400 focus:bg-white transition shadow-inner"
             />
             <Search className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             {searchQuery && (
@@ -161,8 +161,8 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
           </div>
 
           {/* Difficulty Filter */}
-          <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl shrink-0 w-full sm:w-auto justify-center">
-            <span className="text-xs font-black text-gray-600 px-2 flex items-center gap-1">
+          <div className="flex items-center gap-1.5 bg-purple-50/60 p-1.5 rounded-2xl shrink-0 w-full sm:w-auto justify-center border border-purple-100">
+            <span className="text-xs font-black text-[#635B9F] px-2 flex items-center gap-1">
               <Filter className="w-3.5 h-3.5" />
               <span>المستوى:</span>
             </span>
@@ -170,10 +170,10 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                className={`clay-pill px-3 py-1 text-xs font-black transition cursor-pointer ${
                   selectedDifficulty === diff
-                    ? 'bg-amber-500 text-white shadow-xs'
-                    : 'text-gray-600 hover:bg-gray-200'
+                    ? 'clay-pill-active scale-105'
+                    : 'text-gray-700 hover:bg-white'
                 }`}
               >
                 {diff === 'all' && 'الكل'}
@@ -191,10 +191,10 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
             <button
               key={academy.id}
               onClick={() => setSelectedAcademy(academy.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-black shrink-0 transition cursor-pointer border-2 ${
+              className={`clay-pill px-4 py-2 text-xs font-black shrink-0 transition cursor-pointer ${
                 selectedAcademy === academy.id
-                  ? `${academy.color} text-white border-transparent shadow-md scale-102`
-                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                  ? 'clay-pill-active scale-105'
+                  : 'text-[#26214B] hover:bg-white'
               }`}
             >
               {academy.name}
@@ -209,20 +209,20 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
       {/* ========================================================================= */}
       <div>
         <div className="flex items-center justify-between px-2 mb-3">
-          <h3 className="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
+          <h3 className="text-sm sm:text-base font-black text-[#26214B] flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-500" />
             <span>نتائج الألعاب المتاحة ({filteredGames.length} لعبة):</span>
           </h3>
-          <span className="text-xs font-bold text-gray-500">
+          <span className="text-xs font-bold text-[#635B9F]">
             انقر على أي لعبة للانطلاق فوراً 🚀
           </span>
         </div>
 
         {filteredGames.length === 0 ? (
-          <div className="bg-white rounded-[32px] p-12 text-center border-3 border-dashed border-gray-300">
+          <div className="clay-card rounded-[32px] p-12 text-center border-dashed border-gray-300">
             <div className="text-5xl mb-3">🔍🦉</div>
-            <h4 className="text-lg font-black text-gray-800">لم يتم العثور على ألعاب تطابق بحثك</h4>
-            <p className="text-xs font-bold text-gray-500 mt-1">
+            <h4 className="text-lg font-black text-[#26214B]">لم يتم العثور على ألعاب تطابق بحثك</h4>
+            <p className="text-xs font-bold text-[#635B9F] mt-1">
               جرّب تغيير كلمات البحث أو اختيار أكاديمية أخرى!
             </p>
             <button
@@ -231,7 +231,7 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
                 setSelectedAcademy('all');
                 setSelectedDifficulty('all');
               }}
-              className="mt-4 px-5 py-2 bg-amber-500 text-white font-black text-xs rounded-xl shadow-xs cursor-pointer"
+              className="mt-4 clay-btn-coral px-5 py-2.5 rounded-xl text-xs font-black cursor-pointer shadow-md"
             >
               عرض كل الـ 100 لعبة 🌟
             </button>
@@ -242,41 +242,41 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
               <motion.div
                 key={game.id}
                 whileHover={{ y: -4 }}
-                className="bg-white rounded-3xl border-3 border-amber-200 hover:border-amber-400 p-4 sm:p-5 shadow-[0_6px_0_0_#FDE68A] hover:shadow-[0_8px_0_0_#F59E0B] flex flex-col justify-between transition-all group"
+                className="clay-card rounded-[30px] p-4 sm:p-5 flex flex-col justify-between transition-all group hover:shadow-[0_16px_36px_rgba(108,92,231,0.15)]"
               >
                 <div>
                   {/* Card Header: Icon, Badge, Stars */}
                   <div className="flex items-start justify-between mb-3">
-                    <div className="w-14 h-14 bg-gradient-to-tr from-amber-100 to-yellow-50 rounded-2xl flex items-center justify-center text-3xl border-2 border-amber-300 group-hover:scale-110 transition-transform">
+                    <div className="w-14 h-14 bg-gradient-to-tr from-purple-100 to-indigo-50 rounded-2xl flex items-center justify-center text-3xl border border-white/80 shadow-xs group-hover:scale-110 transition-transform">
                       {game.icon}
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <span className="bg-amber-100 text-amber-950 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-amber-200">
+                      <span className="clay-pill px-2.5 py-0.5 text-[10px] font-black text-indigo-900 border-indigo-100">
                         {game.badge}
                       </span>
-                      <span className="text-[10px] font-black text-amber-600 flex items-center gap-0.5">
-                        ⭐ +{game.starsReward} نجمة
+                      <span className="clay-pill px-2 py-0.5 text-[10px] font-black text-amber-700 flex items-center gap-0.5 border-amber-200">
+                        ⭐ +{game.starsReward}
                       </span>
                     </div>
                   </div>
 
                   {/* Title & Academy */}
-                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block mb-1">
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50/80 px-2 py-0.5 rounded-lg inline-block mb-1 border border-indigo-100">
                     {game.academyName} • {game.ageGroup}
                   </span>
                   
-                  <h4 className="text-base font-black text-gray-800 line-clamp-1 group-hover:text-amber-600 transition-colors">
+                  <h4 className="text-base font-black text-[#26214B] line-clamp-1 group-hover:text-purple-700 transition-colors">
                     {game.title}
                   </h4>
 
-                  <p className="text-xs font-bold text-gray-500 line-clamp-2 mt-1.5 leading-relaxed">
+                  <p className="text-xs font-bold text-[#635B9F] line-clamp-2 mt-1.5 leading-relaxed">
                     {game.desc}
                   </p>
 
                   {/* Skills tags */}
                   <div className="flex flex-wrap gap-1 mt-3">
                     {game.skillsLearned.slice(0, 2).map((skill, sIdx) => (
-                      <span key={sIdx} className="bg-gray-100 text-gray-600 text-[9px] font-black px-2 py-0.5 rounded-md">
+                      <span key={sIdx} className="bg-white/80 text-[#635B9F] text-[9px] font-black px-2 py-0.5 rounded-md border border-purple-100">
                         ✓ {skill}
                       </span>
                     ))}
@@ -284,15 +284,15 @@ export default function Games100Hub({ onLaunchGame, stars }: Games100HubProps) {
                 </div>
 
                 {/* Card Action Button */}
-                <div className="border-t border-gray-100 pt-3 mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-[11px] font-black text-gray-400">
+                <div className="border-t border-white/60 pt-3 mt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-[11px] font-black text-[#635B9F]">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span>لعبة #{idx + 1}</span>
                   </div>
 
                   <button
                     onClick={() => handleLaunch(game)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-black rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
+                    className="clay-btn-coral px-4 py-2 text-xs font-black rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition"
                   >
                     <span>العب الآن</span>
                     <Play className="w-3.5 h-3.5 fill-current" />

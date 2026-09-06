@@ -24,9 +24,10 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-vibrant-bg);
+  background-color: #D6D5F2;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  overflow-x: hidden;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -43,6 +44,114 @@ body {
 /* Mobile Safe Area Padding */
 .safe-bottom-dock {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
+}
+
+/* 3D Hexagonal Ambient Background (matching media_1788709434478.jpg) */
+.bg-hex-ambient {
+  background-color: #D7D5F3;
+  background-image: 
+    radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.6) 0%, transparent 60%),
+    radial-gradient(circle at 12% 75%, rgba(56, 225, 255, 0.18) 0%, transparent 35%),
+    radial-gradient(circle at 88% 75%, rgba(224, 86, 253, 0.18) 0%, transparent 35%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='207.84' viewBox='0 0 120 207.84'%3E%3Cpath d='M60 0 L120 34.64 L120 103.92 L60 138.56 L0 103.92 L0 34.64 Z' fill='none' stroke='%23C5C3EB' stroke-width='2' stroke-opacity='0.7'/%3E%3Cpath d='M60 207.84 L120 173.2 L120 103.92 L60 138.56 L0 103.92 L0 173.2 Z' fill='none' stroke='%23C5C3EB' stroke-width='2' stroke-opacity='0.7'/%3E%3Cpath d='M60 45 L90 62.32 L90 96.96 L60 114.28 L30 96.96 L30 62.32 Z' fill='%23ECEBFB' fill-opacity='0.35' stroke='%23B6B3E8' stroke-width='1.5' stroke-opacity='0.5'/%3E%3Cpath d='M60 162.84 L90 145.52 L90 110.88 L60 128.2 L30 110.88 L30 145.52 Z' fill='%23ECEBFB' fill-opacity='0.35' stroke='%23B6B3E8' stroke-width='1.5' stroke-opacity='0.5'/%3E%3C/svg%3E");
+  background-size: auto, auto, auto, 120px 207.84px;
+  background-attachment: fixed;
+}
+
+/* 3D Claymorphic Card Surface */
+.clay-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 12px 32px rgba(108, 92, 231, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 4px rgba(108, 92, 231, 0.06);
+}
+
+.clay-card-lavender {
+  background: rgba(235, 234, 252, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 12px 32px rgba(108, 92, 231, 0.14),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95);
+}
+
+/* 3D Claymorphic Pill Button / Badge */
+.clay-pill {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 4px 14px rgba(108, 92, 231, 0.08),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clay-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(108, 92, 231, 0.14),
+    inset 0 1.5px 2px rgba(255, 255, 255, 1);
+}
+
+.clay-pill:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.clay-pill-active {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFB703 100%);
+  color: #4A3A00;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 6px 18px rgba(255, 183, 3, 0.35),
+    inset 0 2px 3px rgba(255, 255, 255, 0.8);
+}
+
+/* 3D Embossed Buttons */
+.clay-btn-coral {
+  background: linear-gradient(135deg, #FF7675 0%, #E84393 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 8px 22px rgba(232, 67, 147, 0.38),
+    inset 0 2px 3px rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+}
+
+.clay-btn-coral:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 28px rgba(232, 67, 147, 0.45),
+    inset 0 2px 3px rgba(255, 255, 255, 0.8);
+}
+
+.clay-btn-coral:active {
+  transform: translateY(2px) scale(0.97);
+}
+
+.clay-btn-cyan {
+  background: linear-gradient(135deg, #00CEC9 0%, #0984E3 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 8px 22px rgba(9, 132, 227, 0.32),
+    inset 0 2px 3px rgba(255, 255, 255, 0.7);
+}
+
+.clay-btn-purple {
+  background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 8px 22px rgba(108, 92, 231, 0.32),
+    inset 0 2px 3px rgba(255, 255, 255, 0.7);
 }
 
 /* Tactile 3D Push Button Animation */
