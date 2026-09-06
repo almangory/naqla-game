@@ -29,7 +29,6 @@ import {
 import { GameCategory, UserStats } from './types';
 import { useSoundEffects } from './hooks/useSoundEffects';
 import { MobileBottomDock, MobileNavSection } from './components/MobileBottomDock';
-import { HeroAdventureBanner } from './components/HeroAdventureBanner';
 import { MobileStoriesBar } from './components/MobileStoriesBar';
 
 // Lazy Loaded Game Modules for Performance & Code Splitting
@@ -763,17 +762,6 @@ export default function App() {
                 {/* Sub-section Views based on Mobile Bottom Dock Selection */}
                 {mobileNavSection === 'home' && (
                   <div className="space-y-4">
-                    {/* Compact Hero Adventure */}
-                    <HeroAdventureBanner 
-                      onPlayFeaturedGame={(gameId) => {
-                        setActiveTab(gameId as any);
-                        playStarSound();
-                      }}
-                      streak={stats.streak}
-                      level={stats.level}
-                      stars={stats.stars}
-                    />
-
                     {/* 🌟 100 Games Academy Mobile Launcher Card */}
                     <motion.button
                       onClick={() => {
@@ -1064,18 +1052,7 @@ export default function App() {
               /* ========================================================================= */
               <div className="max-w-7xl mx-auto w-full p-4 sm:p-8 space-y-8 animate-fade-in" id="desktop-bento-portal">
                 
-                {/* 1. Hero Adventure Banner */}
-                <HeroAdventureBanner 
-                  onPlayFeaturedGame={(gameId) => {
-                    setActiveTab(gameId as any);
-                    playStarSound();
-                  }}
-                  streak={stats.streak}
-                  level={stats.level}
-                  stars={stats.stars}
-                />
-
-                {/* 2. Top Bento Row: Quick Stats + Customizer Station + Interactive Stickers Wall */}
+                {/* 1. Top Bento Row: Quick Stats + Customizer Station + Interactive Stickers Wall */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   
                   {/* Card 1: Kid Profile & Explorer Level */}
