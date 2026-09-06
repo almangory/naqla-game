@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Cairo", "Inter", system-ui, sans-serif;
+  --font-sans: "Readex Pro", "Tajawal", "Cairo", "Inter", system-ui, sans-serif;
   --color-vibrant-bg: #FFF9E6;
   --color-vibrant-yellow: #FFD93D;
   --color-vibrant-yellow-shadow: #D1B02B;

@@ -3,7 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type GameCategory = 'home' | 'science' | 'math' | 'arabic' | 'english' | 'companion' | 'shop' | 'rewards' | 'drawing' | 'sudan_explore' | 'sudan_quiz' | 'sudan_memory' | 'sudan_dictionary';
+export type GameCategory = 
+  | 'home' 
+  | 'science' 
+  | 'math' 
+  | 'arabic' 
+  | 'english' 
+  | 'companion' 
+  | 'shop' 
+  | 'rewards' 
+  | 'drawing' 
+  | 'sudan_explore' 
+  | 'sudan_quiz' 
+  | 'sudan_memory' 
+  | 'sudan_dictionary'
+  | 'pyramid_stacker'
+  | 'sudan_rhythm';
 
 export interface UserStats {
   stars: number;

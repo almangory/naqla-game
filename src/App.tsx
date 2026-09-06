@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { 
@@ -21,24 +21,55 @@ import {
   Menu,
   X,
   Volume2,
+  VolumeX,
   ArrowRight,
   ArrowLeft,
   Sparkles,
   Compass
 } from 'lucide-react';
 import { GameCategory, UserStats } from './types';
-import ScienceGame from './components/ScienceGame';
-import MathGame from './components/MathGame';
-import ArabicGame from './components/ArabicGame';
-import EnglishGame from './components/EnglishGame';
-import Companion from './components/Companion';
-import ToyShop from './components/ToyShop';
-import RewardsPanel from './components/RewardsPanel';
-import DrawingGame from './components/DrawingGame';
-import SudanExplore from './components/SudanExplore';
-import SudanQuiz from './components/SudanQuiz';
-import SudanMemory from './components/SudanMemory';
-import SudanDictionary from './components/SudanDictionary';
+import { useSoundEffects } from './hooks/useSoundEffects';
+
+// Lazy Loaded Game Modules for Performance & Code Splitting
+const ScienceGame = lazy(() => import('./components/ScienceGame'));
+const MathGame = lazy(() => import('./components/MathGame'));
+const ArabicGame = lazy(() => import('./components/ArabicGame'));
+const EnglishGame = lazy(() => import('./components/EnglishGame'));
+const Companion = lazy(() => import('./components/Companion'));
+const ToyShop = lazy(() => import('./components/ToyShop'));
+const RewardsPanel = lazy(() => import('./components/RewardsPanel'));
+const DrawingGame = lazy(() => import('./components/DrawingGame'));
+const SudanExplore = lazy(() => import('./components/SudanExplore'));
+const SudanQuiz = lazy(() => import('./components/SudanQuiz'));
+const SudanMemory = lazy(() => import('./components/SudanMemory'));
+const SudanDictionary = lazy(() => import('./components/SudanDictionary'));
+const PyramidStackerGame = lazy(() => import('./components/PyramidStackerGame'));
+const SudanRhythmGame = lazy(() => import('./components/SudanRhythmGame'));
+
+// Cheerful Kids Loading Spinner Fallback
+const LoadingFallback = () => (
+  <div className="min-h-[420px] flex flex-col items-center justify-center p-8 bg-white/90 backdrop-blur-md rounded-[32px] border-4 border-[#FFD93D] shadow-[0_8px_0_0_#D1B02B] max-w-lg mx-auto text-center my-8">
+    <motion.div
+      animate={{ 
+        y: [0, -16, 0],
+        rotate: [0, 8, -8, 0]
+      }}
+      transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+      className="text-7xl mb-4 select-none"
+    >
+      🦉✨
+    </motion.div>
+    <h3 className="text-2xl font-black text-gray-800 mb-2">سمسم يجهز لك المغامرة...</h3>
+    <p className="text-sm font-bold text-amber-900 leading-relaxed">
+      حبابك عشرة بلا كشرة! ثوانٍ ونبدأ اللعب والتعلم الممتع! 🇸🇩⭐
+    </p>
+    <div className="mt-6 flex items-center gap-2">
+      <div className="w-3 h-3 bg-[#FF6B6B] rounded-full animate-ping" />
+      <div className="w-3 h-3 bg-[#FFD93D] rounded-full animate-ping [animation-delay:0.2s]" />
+      <div className="w-3 h-3 bg-[#4ECDC4] rounded-full animate-ping [animation-delay:0.4s]" />
+    </div>
+  </div>
+);
 
 const BG_COLORS = [
   { id: 'cream', name: 'البيج الدافئ 🍦', value: '#FFF9E6' },
@@ -65,7 +96,10 @@ const AVAILABLE_STICKERS = [
 ];
 
 export default function App() {
+  const { isMuted, toggleMute, playClick, playStarSound, playLevelUp } = useSoundEffects();
+
   const [activeTab, setActiveTab] = useState<GameCategory>('home');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'sudan' | 'science' | 'languages' | 'arts' | 'brain'>('all');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Background and Sticker settings states
@@ -336,20 +370,28 @@ export default function App() {
   }, [activeTab]);
 
   const menuItems = [
-    { id: 'home', label: '🏠 الرئيسية (بوابة الألعاب)', color: 'border-[#FF6B6B] text-gray-800 bg-white', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#FF6B6B]' },
-    { id: 'science', label: '🧪 مختبر العلوم والفيزياء', color: 'border-[#45AAF2] text-[#3888C1] bg-white', borderColor: 'border-[#45AAF2]', shadowColor: 'shadow-[0_4px_0_0_#3888C1]' },
-    { id: 'math', label: '🧮 قطار الحساب الممتع', color: 'border-[#FF6B6B] text-[#CC5555] bg-white', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#CC5555]' },
-    { id: 'arabic', label: '📝 مملكة الحروف العربية', color: 'border-[#2ECC71] text-[#25A35A] bg-white', borderColor: 'border-[#2ECC71]', shadowColor: 'shadow-[0_4px_0_0_#25A35A]' },
-    { id: 'english', label: '🇬🇧 English Alphabet', color: 'border-[#F1C40F] text-[#C19D0C] bg-white', borderColor: 'border-[#F1C40F]', shadowColor: 'shadow-[0_4px_0_0_#C19D0C]' },
-    { id: 'drawing', label: '🎨 مرسم الألوان السحرية', color: 'border-[#FF8E3C] text-[#CC7130] bg-white', borderColor: 'border-[#FF8E3C]', shadowColor: 'shadow-[0_4px_0_0_#CC7130]' },
-    { id: 'sudan_dictionary', label: '📖 قاموس نقلة المصور', color: 'border-[#1DD1A1] text-[#10AC84] bg-white', borderColor: 'border-[#1DD1A1]', shadowColor: 'shadow-[0_4px_0_0_#10AC84]' },
-    { id: 'sudan_explore', label: '🇸🇩 واحة التراث السوداني الأصيل', color: 'border-[#E28743] text-[#963E00] bg-white', borderColor: 'border-[#E28743]', shadowColor: 'shadow-[0_4px_0_0_#963E00]' },
-    { id: 'sudan_quiz', label: '🧠 ألغاز وفوازير سودانية', color: 'border-[#1DD1A1] text-[#10AC84] bg-white', borderColor: 'border-[#1DD1A1]', shadowColor: 'shadow-[0_4px_0_0_#10AC84]' },
-    { id: 'sudan_memory', label: '🧩 لعبة الذاكرة التراثية', color: 'border-[#FF6B6B] text-[#CC5555] bg-white', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#CC5555]' },
-    { id: 'companion', label: '🦉 اسأل صديقك سمسم (AI)', color: 'border-[#6C5CE7] text-[#5044AB] bg-white', borderColor: 'border-[#6C5CE7]', shadowColor: 'shadow-[0_4px_0_0_#5044AB]' },
-    { id: 'shop', label: '🧸 متجر تزيين الألعاب', color: 'border-[#FF8E3C] text-[#CC7130] bg-white', borderColor: 'border-[#FF8E3C]', shadowColor: 'shadow-[0_4px_0_0_#CC7130]' },
-    { id: 'rewards', label: '🏆 لوحة الأوسمة والتقدم', color: 'border-[#4ECDC4] text-[#3DA199] bg-white', borderColor: 'border-[#4ECDC4]', shadowColor: 'shadow-[0_4px_0_0_#3DA199]' }
+    { id: 'home', label: '🏠 الرئيسية (بوابة الألعاب)', category: 'all', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#FF6B6B]' },
+    { id: 'pyramid_stacker', isNew: true, label: '⛰️ بناة أهرامات كوش', category: 'sudan', borderColor: 'border-[#FFD93D]', shadowColor: 'shadow-[0_4px_0_0_#C49E17]', desc: 'شيد أهرامات البجراوية حجراً فوق حجر واكتشف أسرار كوش!' },
+    { id: 'sudan_rhythm', isNew: true, label: '🪘 إيقاعات وطبول السودان', category: 'arts', borderColor: 'border-[#FF8E3C]', shadowColor: 'shadow-[0_4px_0_0_#B85D19]', desc: 'مختبر موسيقي لعزف الدلوكة والنقارة والطنبور مع سمسم!' },
+    { id: 'science', label: '🧪 مختبر العلوم والفيزياء', category: 'science', borderColor: 'border-[#45AAF2]', shadowColor: 'shadow-[0_4px_0_0_#3888C1]', desc: 'اكتشف قوانين الجاذبية والسرعة والكثافة والحواس الخمس!' },
+    { id: 'math', label: '🧮 قطار الحساب الممتع', category: 'science', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#CC5555]', desc: 'اركب قطار الحساب والرياضيات وحل أمتع المسائل الحسابية!' },
+    { id: 'arabic', label: '📝 مملكة الحروف العربية', category: 'languages', borderColor: 'border-[#2ECC71]', shadowColor: 'shadow-[0_4px_0_0_#25A35A]', desc: 'اكتشف جمال لغتنا العربية، رتب الحروف واكشف النقاط لتربح!' },
+    { id: 'english', label: '🇬🇧 English Alphabet', category: 'languages', borderColor: 'border-[#F1C40F]', shadowColor: 'shadow-[0_4px_0_0_#C19D0C]', desc: 'Learn english alphabets, trace letters, and write words with cute animations!' },
+    { id: 'drawing', label: '🎨 مرسم الألوان السحرية', category: 'arts', borderColor: 'border-[#FF8E3C]', shadowColor: 'shadow-[0_4px_0_0_#CC7130]', desc: 'ارسم لوحات جميلة وضع طوابع التراث السوداني واحفظ لوحتك!' },
+    { id: 'sudan_dictionary', label: '📖 قاموس نقلة المصور', category: 'sudan', borderColor: 'border-[#1DD1A1]', shadowColor: 'shadow-[0_4px_0_0_#10AC84]', desc: 'قاموس مصور يربط الكلمات العربية والإنجليزية ببيئة السودان!' },
+    { id: 'sudan_explore', label: '🇸🇩 واحة التراث السوداني الأصيل', category: 'sudan', borderColor: 'border-[#E28743]', shadowColor: 'shadow-[0_4px_0_0_#963E00]', desc: 'تعلم واستكشف معالم السودان الأثرية وأهرامات مروي وتراثنا!' },
+    { id: 'sudan_quiz', label: '🧠 ألغاز وفوازير سودانية', category: 'brain', borderColor: 'border-[#1DD1A1]', shadowColor: 'shadow-[0_4px_0_0_#10AC84]', desc: 'تحديات ذكاء وأسئلة ممتعة جداً عن ثقافة وطبيعة وتاريخ السودان!' },
+    { id: 'sudan_memory', label: '🧩 لعبة الذاكرة التراثية', category: 'brain', borderColor: 'border-[#FF6B6B]', shadowColor: 'shadow-[0_4px_0_0_#CC5555]', desc: 'اختبر ذاكرتك الحديدية وطابق بطاقات التراث السوداني الأصيل!' },
+    { id: 'companion', label: '🦉 اسأل صديقك سمسم (AI)', category: 'brain', borderColor: 'border-[#6C5CE7]', shadowColor: 'shadow-[0_4px_0_0_#5044AB]', desc: 'تحدث مع صديقك المرشد الذكي البومة سمسم واسأله أي سؤال!' },
+    { id: 'shop', label: '🧸 متجر تزيين الألعاب', category: 'brain', borderColor: 'border-[#FF8E3C]', shadowColor: 'shadow-[0_4px_0_0_#CC7130]', desc: 'استخدم نجومك التي كسبتها لشراء أزياء وتزيين رائع لصديقك سمسم!' },
+    { id: 'rewards', label: '🏆 لوحة الأوسمة والتقدم', category: 'brain', borderColor: 'border-[#4ECDC4]', shadowColor: 'shadow-[0_4px_0_0_#3DA199]', desc: 'لوحة أوسمتك التي كسبتها ومستواك الحالي وإحصائيات رحلتك!' }
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.id === 'home') return false;
+    if (activeFilter === 'all') return true;
+    return item.category === activeFilter;
+  });
 
   const currentBgColor = BG_COLORS.find(c => c.id === bgColor)?.value || '#FFF9E6';
 
@@ -417,7 +459,20 @@ export default function App() {
             </div>
 
             {/* Quick stats on top */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Sound Toggle Button */}
+              <button
+                onClick={() => {
+                  toggleMute();
+                  playClick();
+                }}
+                className="w-11 h-11 bg-white hover:bg-amber-50 border-3 border-[#FF8E3C] rounded-2xl flex items-center justify-center text-gray-700 shadow-sm cursor-pointer transition-transform hover:scale-105"
+                title={isMuted ? 'تشغيل المؤثرات الصوتية' : 'كتم الصوت'}
+                id="sound-toggle-btn"
+              >
+                {isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-amber-600" />}
+              </button>
+
               {/* Stars score in Vibrant Palette style */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -813,20 +868,51 @@ export default function App() {
 
                   </div>
 
-                  {/* Games Grid */}
+                  {/* Games Grid with Cluster Filters */}
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-[#4D4D4D] mb-6 text-right flex items-center gap-2">
-                      <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" /> اختر مغامرتك المفضلة وابدأ التعلم:
-                    </h3>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+                      <h3 className="text-xl sm:text-2xl font-black text-[#4D4D4D] flex items-center gap-2">
+                        <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+                        <span>اختر مغامرتك المفضلة وابدأ التعلم:</span>
+                      </h3>
+
+                      {/* Filter Tabs */}
+                      <div className="flex flex-wrap gap-1.5 bg-white p-1.5 rounded-2xl border-2 border-amber-200 shadow-sm">
+                        {[
+                          { id: 'all', label: '🌟 كل الألعاب' },
+                          { id: 'sudan', label: '🇸🇩 أمجاد السودان' },
+                          { id: 'science', label: '🧪 علوم وحساب' },
+                          { id: 'languages', label: '📚 لغات وحروف' },
+                          { id: 'arts', label: '🎨 فنون وموسيقى' },
+                          { id: 'brain', label: '🦉 أذكياء نقلة' },
+                        ].map((tab) => (
+                          <button
+                            key={tab.id}
+                            onClick={() => {
+                              setActiveFilter(tab.id as any);
+                              playClick();
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+                              activeFilter === tab.id
+                                ? 'bg-[#FFD93D] text-gray-900 shadow-sm font-black'
+                                : 'text-gray-600 hover:bg-amber-50'
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {menuItems.filter(item => item.id !== 'home').map((item) => (
+                      {filteredMenuItems.map((item) => (
                         <button
                           key={item.id}
                           onClick={() => {
                             setActiveTab(item.id as any);
-                            playWinSound();
+                            playStarSound();
                           }}
-                          className={`group text-right p-5 rounded-[28px] border-4 bg-white hover:bg-amber-50/20 shadow-[0_6px_0_0_#D1D1D1] transition-all hover:translate-y-[2px] hover:shadow-[0_4px_0_0_#D1D1D1] active:translate-y-[6px] active:shadow-none flex flex-col justify-between h-[180px] cursor-pointer ${item.borderColor}`}
+                          className={`group text-right p-5 rounded-[28px] border-4 bg-white hover:bg-amber-50/30 shadow-[0_6px_0_0_#D1D1D1] transition-all hover:translate-y-[2px] hover:shadow-[0_4px_0_0_#D1D1D1] active:translate-y-[6px] active:shadow-none flex flex-col justify-between h-[190px] cursor-pointer relative overflow-hidden ${item.borderColor}`}
                           id={`dashboard-card-${item.id}`}
                         >
                           <div>
@@ -834,26 +920,22 @@ export default function App() {
                               <span className="text-4xl select-none group-hover:scale-110 transition-transform duration-300">
                                 {item.label.split(' ')[0]}
                               </span>
-                              <span className="bg-gray-100 group-hover:bg-amber-200 text-gray-500 group-hover:text-amber-950 text-[10px] font-black px-2 py-0.5 rounded-full border border-gray-200 transition-colors">
-                                دخول المغامرة 🚀
-                              </span>
+                              <div className="flex items-center gap-1">
+                                {(item as any).isNew && (
+                                  <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                                    جديد 🆕
+                                  </span>
+                                )}
+                                <span className="bg-gray-100 group-hover:bg-amber-200 text-gray-500 group-hover:text-amber-950 text-[10px] font-black px-2 py-0.5 rounded-full border border-gray-200 transition-colors">
+                                  دخول 🚀
+                                </span>
+                              </div>
                             </div>
                             <h4 className="text-base font-black text-gray-800 group-hover:text-[#CC7130] transition-colors mt-1">
                               {item.label.substring(item.label.indexOf(' ') + 1)}
                             </h4>
-                            <p className="text-gray-500 text-[11px] font-bold mt-1 line-clamp-2 leading-relaxed">
-                              {item.id === 'science' && 'اكتشف قوانين الجاذبية والسرعة الممتعة وقم بإجراء تجارب علمية مذهلة!'}
-                              {item.id === 'math' && 'اركب قطار الحساب والرياضيات الممتع وحل أسرع المسائل الحسابية المبهجة!'}
-                              {item.id === 'arabic' && 'اكتشف جمال لغتنا العربية الساحرة، رتب الحروف واكشف النقاط لتربح!'}
-                              {item.id === 'english' && 'Learn english alphabets, trace letters, and write words with cute animations!'}
-                              {item.id === 'drawing' && 'ارسم لوحات جميلة ولونها بالفرشاة السحرية وعرضها على البومة سمسم!'}
-                              {item.id === 'sudan_explore' && 'تعلم واستكشف معالم السودان الأثرية وأهرامات مروي وتراثنا وطيبتنا!'}
-                              {item.id === 'sudan_quiz' && 'تحديات ذكاء وأسئلة ممتعة جداً عن ثقافة وتراث وطبيعة السودان الحبيب!'}
-                              {item.id === 'sudan_memory' && 'اختبر ذاكرتك الحديدية وطابق بطاقات التراث السوداني الأصيل واكسب نقاطاً!'}
-                              {item.id === 'sudan_dictionary' && 'قاموس مصور يربط الكلمات العربية والإنجليزية بصور من بيئة السودان الجميلة!'}
-                              {item.id === 'companion' && 'تحدث مع صديقك المرشد الذكي البومة سمسم، واسأله أي سؤال تعليمي أو ذكي!'}
-                              {item.id === 'shop' && 'استخدم نجومك التي كسبتها لشراء أزياء وتزيين رائع لصديقك سمسم!'}
-                              {item.id === 'rewards' && 'لوحة أوسمتك التي كسبتها ومستواك الحالي وإحصائيات رحلتك الممتعة!'}
+                            <p className="text-gray-500 text-[11px] font-bold mt-1.5 line-clamp-2 leading-relaxed">
+                              {item.desc}
                             </p>
                           </div>
                         </button>
@@ -873,42 +955,50 @@ export default function App() {
                   </div>
                 </div>
               )}
-              {activeTab === 'science' && (
-                <ScienceGame addStars={addStars} />
-              )}
-              {activeTab === 'math' && (
-                <MathGame addStars={addStars} />
-              )}
-              {activeTab === 'arabic' && (
-                <ArabicGame addStars={addStars} />
-              )}
-              {activeTab === 'english' && (
-                <EnglishGame addStars={addStars} />
-              )}
-              {activeTab === 'drawing' && (
-                <DrawingGame addStars={addStars} />
-              )}
-              {activeTab === 'sudan_dictionary' && (
-                <SudanDictionary addStars={addStars} onBackToMain={() => handleBackClick()} />
-              )}
-              {activeTab === 'sudan_explore' && (
-                <SudanExplore addStars={addStars} />
-              )}
-              {activeTab === 'sudan_quiz' && (
-                <SudanQuiz addStars={addStars} />
-              )}
-              {activeTab === 'sudan_memory' && (
-                <SudanMemory addStars={addStars} />
-              )}
-              {activeTab === 'companion' && (
-                <Companion stats={stats} addStars={addStars} />
-              )}
-              {activeTab === 'shop' && (
-                <ToyShop stats={stats} unlockToy={unlockToy} equipToy={equipToy} />
-              )}
-              {activeTab === 'rewards' && (
-                <RewardsPanel stats={stats} />
-              )}
+              <Suspense fallback={<LoadingFallback />}>
+                {activeTab === 'pyramid_stacker' && (
+                  <PyramidStackerGame addStars={addStars} />
+                )}
+                {activeTab === 'sudan_rhythm' && (
+                  <SudanRhythmGame addStars={addStars} />
+                )}
+                {activeTab === 'science' && (
+                  <ScienceGame addStars={addStars} />
+                )}
+                {activeTab === 'math' && (
+                  <MathGame addStars={addStars} />
+                )}
+                {activeTab === 'arabic' && (
+                  <ArabicGame addStars={addStars} />
+                )}
+                {activeTab === 'english' && (
+                  <EnglishGame addStars={addStars} />
+                )}
+                {activeTab === 'drawing' && (
+                  <DrawingGame addStars={addStars} />
+                )}
+                {activeTab === 'sudan_dictionary' && (
+                  <SudanDictionary addStars={addStars} onBackToMain={() => handleBackClick()} />
+                )}
+                {activeTab === 'sudan_explore' && (
+                  <SudanExplore addStars={addStars} />
+                )}
+                {activeTab === 'sudan_quiz' && (
+                  <SudanQuiz addStars={addStars} />
+                )}
+                {activeTab === 'sudan_memory' && (
+                  <SudanMemory addStars={addStars} />
+                )}
+                {activeTab === 'companion' && (
+                  <Companion stats={stats} addStars={addStars} />
+                )}
+                {activeTab === 'shop' && (
+                  <ToyShop stats={stats} unlockToy={unlockToy} equipToy={equipToy} />
+                )}
+                {activeTab === 'rewards' && (
+                  <RewardsPanel stats={stats} />
+                )}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </main>

@@ -7,6 +7,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Timer, Sparkles, Award, RotateCcw, AlertTriangle, BookOpen, Volume2, ArrowLeft, ArrowRight } from 'lucide-react';
 
+import { useSpeech } from '../hooks/useSpeech';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import confetti from 'canvas-confetti';
+
 interface SudanQuizProps {
   addStars: (amount: number) => void;
 }
@@ -22,6 +26,9 @@ interface Riddle {
 }
 
 export default function SudanQuiz({ addStars }: SudanQuizProps) {
+  const { speak } = useSpeech();
+  const { playClick, playCorrect, playWrong, playStarSound } = useSoundEffects();
+
   const [currentRiddleIdx, setCurrentRiddleIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
@@ -102,13 +109,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
 
   // Speech Synthesizer for Riddles
   const readRiddleAloud = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    }
+    speak(text);
   };
 
   // Timer loop logic
@@ -119,6 +120,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
       }, 1000);
     } else if (timeLeft === 0 && isTimerRunning) {
       setIsTimerRunning(false);
+      playWrong();
       setFeedback({
         correct: false,
         message: "أوه! لقد انتهى الوقت المخصص لحل اللغز! ⏰ حاول مجدداً بنقر 'إعادة المحاولة' لتصبح أسرع!"
@@ -153,6 +155,9 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
 
     if (opt === currentRiddle.correct) {
       addStars(20);
+      playCorrect();
+      playStarSound();
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
       setScore(prev => prev + 1);
       setFeedback({
         correct: true,
@@ -160,6 +165,7 @@ export default function SudanQuiz({ addStars }: SudanQuizProps) {
       });
       readRiddleAloud("يا سلام عليك يا بطل! إجابة عبقرية وصحيحة!");
     } else {
+      playWrong();
       setFeedback({
         correct: false,
         message: `أوه! الإجابة غير صحيحة تماماً. الإجابة الصحيحة هي: (${currentRiddle.correct})`

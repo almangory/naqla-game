@@ -1,28 +1,41 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Trash2, Edit2, CheckCircle, RefreshCw, Palette } from 'lucide-react';
+import { Sparkles, Trash2, Edit2, CheckCircle, RefreshCw, Palette, Download, Stamp } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 
 interface DrawingGameProps {
   addStars: (amount: number) => void;
 }
 
+const STAMPS = [
+  { id: 'pyramid', emoji: '⛰️', label: 'هرم مروي' },
+  { id: 'palm', emoji: '🌴', label: 'نخلة' },
+  { id: 'camel', emoji: '🐪', label: 'جمل' },
+  { id: 'flag', emoji: '🇸🇩', label: 'علم السودان' },
+  { id: 'coffee', emoji: '☕', label: 'الجبنة' },
+  { id: 'owl', emoji: '🦉', label: 'سمسم' },
+  { id: 'star', emoji: '⭐', label: 'نجمة' },
+];
+
 export default function DrawingGame({ addStars }: DrawingGameProps) {
+  const { playClick, playStarSound } = useSoundEffects();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [color, setColor] = useState('#FF6B6B');
   const [brushSize, setBrushSize] = useState(6);
   const [isEraser, setIsEraser] = useState(false);
+  const [activeStamp, setActiveStamp] = useState<string | null>(null);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
   const [drawnSomething, setDrawnSomething] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  // Creative Drawing Prompts (Sudanese Traditional / Cultural inspiration!)
   const drawingPrompts = [
     { text: 'ارسم أهرامات البجراوية السودانية العظيمة ⛰️', stars: 20 },
     { text: 'ارسم جمل الصحراء الصبور ذو السنامين 🐪', stars: 15 },
@@ -33,7 +46,6 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
   
   const [currentPromptIdx, setCurrentPromptIdx] = useState(0);
 
-  // Resize canvas according to parent size and preserve drawing
   const resizeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas || !containerRef.current) return;
@@ -43,7 +55,6 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     const rect = containerRef.current.getBoundingClientRect();
     const width = Math.max(rect.width || containerRef.current.clientWidth || 600, 300);
 
-    // Temporary save content
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
@@ -52,56 +63,32 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
       tempCtx.drawImage(canvas, 0, 0);
     }
 
-    // Set new size from parent
     canvas.width = width;
-    canvas.height = 420; // fixed height for better layout
+    canvas.height = 420;
 
-    // Fill with white first, then draw the temp content to keep white background
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Re-draw saved content if there was any
     if (tempCtx && tempCanvas.width > 0 && tempCanvas.height > 0) {
       ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
     }
     
-    // Set styles again
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
   };
 
   useEffect(() => {
     resizeCanvas();
-    // A small timeout ensures layout is finished and we get the correct size
-    const timer = setTimeout(resizeCanvas, 100);
     window.addEventListener('resize', resizeCanvas);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', resizeCanvas);
-    };
+    return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
-  // Initialize canvas defaults on mount
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    
-    // Fill background with light yellow-white to ensure clean base
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, []);
-
-  const getCoordinates = (e: React.MouseEvent | React.TouchEvent): { x: number; y: number } => {
+  const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     
     if ('touches' in e) {
-      if (e.touches.length === 0) return { x: 0, y: 0 };
       return {
         x: e.touches[0].clientX - rect.left,
         y: e.touches[0].clientY - rect.top
@@ -114,17 +101,35 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     }
   };
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
+  const handlePointerDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const pos = getCoordinates(e);
+
+    // If stamp is active, stamp emoji onto canvas
+    if (activeStamp) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const stampObj = STAMPS.find(s => s.id === activeStamp);
+      if (stampObj) {
+        ctx.font = '42px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(stampObj.emoji, pos.x, pos.y);
+        setDrawnSomething(true);
+        playClick();
+      }
+      return;
+    }
+
     setIsDrawing(true);
     setLastPos(pos);
     setDrawnSomething(true);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    e.preventDefault();
+    if (!isDrawing || activeStamp) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -156,6 +161,19 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     setDrawnSomething(false);
     setFeedback(null);
+    playClick();
+  };
+
+  const downloadArtwork = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const imageUri = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `لوحة_أكاديمية_نقلة_${Date.now()}.png`;
+    link.href = imageUri;
+    link.click();
+    playClick();
+    confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
   };
 
   const finishDrawing = () => {
@@ -166,6 +184,8 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     
     const reward = drawingPrompts[currentPromptIdx].stars;
     addStars(reward);
+    playStarSound();
+    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 } });
     setFeedback(`يا للرووووعة! لقد رسمت لوحة مذهلة ومتقنة تستحق التقدير! كسبت ${reward} نجمة ذهبية! ⭐🎨`);
   };
 
@@ -174,7 +194,6 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     clearCanvas();
   };
 
-  // Fun colors for children (including Sudanese touch: desert sand #F4A460, flag colors)
   const colors = [
     { hex: '#FF6B6B', name: 'أحمر قاني' },
     { hex: '#4ECDC4', name: 'نيلوز' },
@@ -182,16 +201,16 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
     { hex: '#FFD93D', name: 'أصفر ذهبي' },
     { hex: '#FF8E3C', name: 'برتقالي' },
     { hex: '#6C5CE7', name: 'بنفسجي سحري' },
-    { hex: '#F4A460', name: 'رملي سوداني' }, // Warm Sudanese desert sand tone
+    { hex: '#F4A460', name: 'رملي سوداني' },
     { hex: '#2C3E50', name: 'أسود داكن' },
-    { hex: '#54A0FF', name: 'أزرق النيل' }, // Nile Blue
+    { hex: '#54A0FF', name: 'أزرق النيل' },
     { hex: '#FF9FF3', name: 'وردي لطيف' }
   ];
 
   return (
     <div className="bg-white rounded-[32px] p-6 sm:p-8 border-4 border-[#FF8E3C] shadow-[0_8px_0_0_#CC7130]" id="drawing-game-container">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-4 border-orange-50 pb-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-4 border-orange-50 pb-4 gap-3">
         <div className="text-right">
           <h2 className="text-3xl font-black text-[#CC7130] flex items-center gap-2">
             🎨 مرسم الألوان والفرشاة السحرية 🇸🇩
@@ -200,183 +219,158 @@ export default function DrawingGame({ addStars }: DrawingGameProps) {
             أطلق العنان لخيالك، ارسم لوحات مستوحاة من البيئة والتراث السوداني الأصيل واكسب النجوم!
           </p>
         </div>
-        <button
-          onClick={nextChallenge}
-          className="mt-3 md:mt-0 bg-[#FFD93D] text-[#7A6A24] border-4 border-[#7A6A24] font-black px-4 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-[0_4px_0_0_#D1B02B] hover:translate-y-[2px] hover:shadow-none transition cursor-pointer"
-          id="change-challenge-btn"
-        >
-          <RefreshCw className="w-4 h-4" /> تحدٍ آخر للرسم
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={downloadArtwork}
+            className="bg-[#2ECC71] text-white border-2 border-green-700 font-black px-3.5 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-sm hover:bg-green-600 transition cursor-pointer"
+            title="حفظ اللوحة على جهازك"
+          >
+            <Download className="w-4 h-4" /> حفظ اللوحة
+          </button>
+          <button
+            onClick={nextChallenge}
+            className="bg-[#FFD93D] text-[#7A6A24] border-2 border-[#7A6A24] font-black px-3.5 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-sm hover:bg-yellow-400 transition cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" /> تحدٍ آخر
+          </button>
+        </div>
       </div>
 
-      {/* Drawing Prompt Alert Banner */}
+      {/* Drawing Prompt Banner */}
       <div className="bg-[#FFF5EE] border-4 border-[#FF8E3C] rounded-2xl p-4 mb-6 flex items-center gap-3">
         <span className="text-4xl select-none">💡</span>
         <div className="text-right">
-          <p className="text-[#CC7130] font-black text-sm">تحدي الرسم الحالي للاعب الذكي:</p>
-          <p className="text-[#4D4D4D] font-black text-base mt-1">
+          <p className="text-[#CC7130] font-black text-xs">تحدي الرسم الحالي للاعب الذكي:</p>
+          <p className="text-[#4D4D4D] font-black text-sm sm:text-base mt-0.5">
             {drawingPrompts[currentPromptIdx].text}
           </p>
         </div>
       </div>
 
-      {/* Main Grid: Tools left, Canvas right */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* Paint Box & Controls Sidebar */}
-        <div className="bg-orange-50/50 p-4 rounded-[24px] border-4 border-[#FFC499] flex flex-col gap-4">
-          
-          {/* Colors Selection */}
-          <div>
-            <h3 className="font-black text-sm text-[#CC7130] mb-2 flex items-center gap-1">
-              <Palette className="w-4 h-4" /> اختر الألوان:
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-              {colors.map((c) => (
-                <button
-                  key={c.hex}
-                  onClick={() => {
-                    setColor(c.hex);
-                    setIsEraser(false);
-                  }}
-                  className={`w-9 h-9 rounded-xl border-3 transition-transform cursor-pointer relative ${
-                    color === c.hex && !isEraser
-                      ? 'border-[#CC7130] scale-110 shadow-md'
-                      : 'border-white hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: c.hex }}
-                  title={c.name}
-                  id={`color-btn-${c.hex.replace('#', '')}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Eraser and Pen selection */}
-          <div className="flex gap-2">
+      {/* Sudanese Heritage Stamps Toolbar */}
+      <div className="mb-4 p-3 bg-amber-50/80 rounded-2xl border-2 border-amber-200">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-black text-amber-900 flex items-center gap-1">
+            <span>✨ طوابع وأختام التراث السوداني:</span>
+            <span className="text-[10px] text-gray-500 font-normal">(اختر ختماً واضغط على اللوحة لتثبيته!)</span>
+          </span>
+          {activeStamp && (
             <button
-              onClick={() => setIsEraser(false)}
-              className={`flex-1 py-2 rounded-xl border-3 font-black text-xs cursor-pointer flex items-center justify-center gap-1 transition ${
-                !isEraser
-                  ? 'bg-[#FF8E3C] border-[#CC7130] text-white shadow-sm'
-                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-              }`}
-              id="tool-pen-btn"
+              onClick={() => setActiveStamp(null)}
+              className="text-[11px] bg-red-100 text-red-700 px-2 py-0.5 rounded-lg font-bold hover:bg-red-200"
             >
-              <Edit2 className="w-4 h-4" /> قلم التلوين
+              إلغاء الختم والعودة للفرشاة 🖌️
             </button>
-            <button
-              onClick={() => setIsEraser(true)}
-              className={`flex-1 py-2 rounded-xl border-3 font-black text-xs cursor-pointer flex items-center justify-center gap-1 transition ${
-                isEraser
-                  ? 'bg-[#FF8E3C] border-[#CC7130] text-white shadow-sm'
-                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-              }`}
-              id="tool-eraser-btn"
-            >
-              🧽 الممحاة
-            </button>
-          </div>
-
-          {/* Brush Size Slider */}
-          <div>
-            <div className="flex justify-between items-center mb-1 text-xs font-black text-gray-600">
-              <span>حجم الفرشاة:</span>
-              <span className="bg-white px-2 py-0.5 rounded-md border border-gray-300 font-mono">{brushSize}px</span>
-            </div>
-            <input
-              type="range"
-              min="2"
-              max="24"
-              value={brushSize}
-              onChange={(e) => setBrushSize(parseInt(e.target.value))}
-              className="w-full accent-[#FF8E3C] cursor-pointer"
-              id="brush-size-slider"
-            />
-            {/* Visual preview of brush size */}
-            <div className="flex justify-center items-center mt-2 bg-white h-8 rounded-lg border border-gray-200">
-              <div 
-                className="rounded-full"
-                style={{
-                  width: `${brushSize}px`,
-                  height: `${brushSize}px`,
-                  backgroundColor: isEraser ? '#D1D1D1' : color
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Clear & Action Buttons */}
-          <div className="space-y-2 mt-auto">
-            <button
-              onClick={clearCanvas}
-              className="w-full py-2.5 bg-white hover:bg-red-50 text-red-500 border-4 border-red-200 rounded-xl font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:translate-y-0.5"
-              id="clear-canvas-btn"
-            >
-              <Trash2 className="w-4 h-4" /> مسح كامل اللوحة
-            </button>
-
-            <button
-              onClick={finishDrawing}
-              className="w-full py-3 bg-[#4ECDC4] hover:bg-[#3DA199] text-white border-4 border-[#3DA199] rounded-xl font-black text-sm cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_4px_0_0_#3DA199] active:translate-y-[2px] active:shadow-none transition-all"
-              id="finish-drawing-btn"
-            >
-              <CheckCircle className="w-5 h-5" /> إنهاء وعرض اللوحة على سمسم ⭐
-            </button>
-          </div>
-
+          )}
         </div>
-
-        {/* Canvas Screen */}
-        <div className="lg:col-span-3 flex flex-col justify-between" ref={containerRef}>
-          <div className="border-4 border-dashed border-[#FFC499] rounded-[24px] overflow-hidden bg-white shadow-inner relative cursor-crosshair">
-            <canvas
-              ref={canvasRef}
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              onTouchStart={startDrawing}
-              onTouchMove={draw}
-              onTouchEnd={stopDrawing}
-              className="block w-full h-[420px]"
-            />
-            
-            {/* Background guide prompt helper */}
-            {!drawnSomething && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-4">
-                <span className="text-6xl animate-pulse">✨🎨</span>
-                <p className="text-gray-400 font-black text-base mt-3">ارسم حلمك هنا! استخدم الفرشاة واللمسات السحرية.</p>
-                <p className="text-gray-400 text-xs mt-1 font-bold">يدعم الرسم باللمس والماوس معاً.</p>
-              </div>
-            )}
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {STAMPS.map((stamp) => (
+            <button
+              key={stamp.id}
+              onClick={() => {
+                setActiveStamp(activeStamp === stamp.id ? null : stamp.id);
+                setIsEraser(false);
+                playClick();
+              }}
+              className={`px-3 py-1.5 rounded-xl border-2 text-xs font-black flex items-center gap-1.5 transition cursor-pointer ${
+                activeStamp === stamp.id
+                  ? 'bg-amber-400 border-amber-600 scale-105 shadow-sm text-gray-900'
+                  : 'bg-white border-amber-200 hover:bg-amber-100 text-gray-700'
+              }`}
+            >
+              <span className="text-lg">{stamp.emoji}</span>
+              <span>{stamp.label}</span>
+            </button>
+          ))}
         </div>
-
       </div>
 
-      {/* Feedback & Award Panel */}
-      <AnimatePresence>
-        {feedback && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            className="mt-6 bg-[#FFF9E6] border-4 border-[#FFD93D] p-5 rounded-[24px] flex items-start gap-4 shadow-[0_6px_0_0_#D1B02B]"
-            id="drawing-feedback-box"
-          >
-            <div className="text-4xl">🦉</div>
-            <div>
-              <h4 className="text-[#CC9300] font-black text-lg mb-1">تعليق البومة الحكيمة سمسم:</h4>
-              <p className="text-gray-700 font-bold text-sm leading-relaxed">{feedback}</p>
-              <p className="text-xs text-gray-500 mt-2 font-medium">
-                تذكر أن كل رسمة هي لوحة فريدة ومبهجة تلون عالمنا بالأمل والإبداع! استمر بالرسم لتكسب أوسمة الإبداع والفن الرائع.
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Main Canvas Area */}
+      <div 
+        ref={containerRef} 
+        className="w-full border-4 border-[#FF8E3C] rounded-2xl overflow-hidden shadow-inner bg-white mb-6 relative touch-none cursor-crosshair"
+      >
+        <canvas
+          ref={canvasRef}
+          onMouseDown={handlePointerDown}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={handlePointerDown}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className="w-full block"
+        />
+      </div>
 
+      {/* Controls: Colors and Tools */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t-4 border-orange-50 pt-4">
+        {/* Colors Palette */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Palette className="w-5 h-5 text-gray-500 mr-1" />
+          {colors.map((c) => (
+            <button
+              key={c.hex}
+              onClick={() => {
+                setColor(c.hex);
+                setIsEraser(false);
+                setActiveStamp(null);
+                playClick();
+              }}
+              style={{ backgroundColor: c.hex }}
+              className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer shadow-sm ${
+                color === c.hex && !isEraser && !activeStamp
+                  ? 'scale-125 border-gray-800 ring-2 ring-orange-400' 
+                  : 'border-white hover:scale-110'
+              }`}
+              title={c.name}
+            />
+          ))}
+        </div>
+
+        {/* Brush Size & Tools */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setIsEraser(!isEraser);
+              setActiveStamp(null);
+              playClick();
+            }}
+            className={`px-3 py-2 rounded-xl border-2 font-black text-xs flex items-center gap-1.5 transition cursor-pointer ${
+              isEraser 
+                ? 'bg-red-500 border-red-700 text-white' 
+                : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <span>🧹 ممحاة</span>
+          </button>
+
+          <button
+            onClick={clearCanvas}
+            className="px-3 py-2 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-600 font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" /> تنظيف
+          </button>
+
+          <button
+            onClick={finishDrawing}
+            className="px-5 py-2.5 bg-[#FF6B6B] hover:bg-red-500 text-white border-2 border-red-700 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <Sparkles className="w-4 h-4" /> اعتماد اللوحة وكسب النجوم! ⭐
+          </button>
+        </div>
+      </div>
+
+      {/* Feedback Banner */}
+      {feedback && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 p-3 bg-green-50 border-2 border-green-300 rounded-xl text-center text-xs font-black text-green-800"
+        >
+          {feedback}
+        </motion.div>
+      )}
     </div>
   );
 }

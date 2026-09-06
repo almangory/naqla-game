@@ -7,6 +7,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, Sparkles, Volume2, HelpCircle, RefreshCw, Loader2, Smile } from 'lucide-react';
 import { ChatMessage, UserStats } from '../types';
+import { useSpeech } from '../hooks/useSpeech';
+import { useSoundEffects } from '../hooks/useSoundEffects';
 
 interface CompanionProps {
   stats: UserStats;
@@ -14,6 +16,9 @@ interface CompanionProps {
 }
 
 export default function Companion({ stats, addStars }: CompanionProps) {
+  const { speak, isSpeaking } = useSpeech();
+  const { playClick, playStarSound } = useSoundEffects();
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'companion',
@@ -24,7 +29,6 @@ export default function Companion({ stats, addStars }: CompanionProps) {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Suggested questions for kids (quick clicks)
@@ -38,26 +42,6 @@ export default function Companion({ stats, addStars }: CompanionProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Speak text in Arabic using browser synthesis
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      // Remove emojis and special chars for smoother pronunciation
-      const cleanText = text.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '');
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.9; // Kids friendly speed
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      console.warn('نظام القراءة الصوتية غير مدعوم في هذا المتصفح');
-    }
-  };
 
   const handleSendMessage = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;

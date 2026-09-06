@@ -7,88 +7,25 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, MapPin, Sparkles, Volume2, Award, Info, Heart } from 'lucide-react';
 
+import { SUDAN_LANDMARKS, SUDAN_TOOLS } from '../data/sudanData';
+import { useSpeech } from '../hooks/useSpeech';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import confetti from 'canvas-confetti';
+
 interface SudanExploreProps {
   addStars: (amount: number) => void;
 }
 
 export default function SudanExplore({ addStars }: SudanExploreProps) {
+  const { speak } = useSpeech();
+  const { playClick, playCorrect, playWrong, playStarSound } = useSoundEffects();
+
   const [selectedCategory, setSelectedCategory] = useState<'landmarks' | 'tools'>('landmarks');
   const [selectedItemId, setSelectedItemId] = useState('pyramids');
   const [answeredQuizList, setAnsweredQuizList] = useState<string[]>([]);
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null);
-
-  // Sudan Historical & Geographical Landmarks
-  const landmarks = [
-    {
-      id: 'pyramids',
-      name: 'أهرامات مروي (البجراوية) ⛰️',
-      location: 'ولاية نهر النيل',
-      emoji: '⛰️',
-      summary: 'مدافن ملكية قديمة لملوك وملكات مملكة كوش العظيمة. هل تعلم أن السودان يحتوي على أكثر من 220 هرماً، وهو عدد يفوق أهرامات مصر؟ 🇸🇩✨',
-      details: 'بنيت هذه الأهرامات بنسب مدببة رائعة قبل آلاف السنين لتخليد ملوك مملكة مروي القديمة، وتعتبر من أهم مواقع التراث العالمي لليونسكو في السودان وأفريقيا.',
-      quiz: {
-        question: 'أي مملكة سودانية قديمة بنيت أهرامات البجراوية لتكون مدافن لملوكها؟',
-        options: ['مملكة كوش المروية', 'مملكة ليديا', 'مملكة الأنباط'],
-        correct: 'مملكة كوش المروية',
-        reward: 15
-      }
-    },
-    {
-      id: 'niles',
-      name: 'ملتقى النيلين (مقرن النيلين) 🌊',
-      location: 'الخرطوم',
-      emoji: '🌊',
-      summary: 'هنا يلتقي النيل الأزرق القادم من هضبة الحبشة بالنيل الأبيض القادم من بحيرة فيكتوريا، ليتعانقا ويشكلا نهر النيل أطول أنهار العالم! 💙🤍',
-      details: 'النيل الأزرق يتميز بقوة تدفقه ولونه الطيني الداكن، بينما النيل الأبيض يجري بهدوء بمياه صافية هادئة. مشهد المقرن في الخرطوم فريد ويسحر الأبصار.',
-      quiz: {
-        question: 'أين يلتقي النيل الأزرق بالنيل الأبيض ليشكلان نهر النيل العظيم؟',
-        options: ['في مدينة بورتسودان', 'في مدينة الخرطوم (المقرن)', 'في مدينة دنقلا'],
-        correct: 'في مدينة الخرطوم (المقرن)',
-        reward: 15
-      }
-    },
-    {
-      id: 'jebel_marra',
-      name: 'جبل مرة الأخضر ⛰️🌲',
-      location: 'دارفور (غرب السودان)',
-      emoji: '🌲',
-      summary: 'منطقة بركانية خضراء خلابة تتميز بطقسها المعتدل البارد طوال العام، وبها شلالات مياه عذبة وبساتين فواكه غنية مثل التفاح والبرتقال 🍏🍊!',
-      details: 'يرتفع جبل مرة حوالي 3000 متر فوق سطح البحر، وتغطي منحدراته غابات من الصنوبر والعرعر ومزارع مدرجة غنية تنتج أشهى ثمار الفاكهة في السودان.',
-      quiz: {
-        question: 'في أي إقليم من أقاليم السودان يقع جبل مرة ذو الطبيعة البركانية الخضراء والشلالات؟',
-        options: ['إقليم دارفور العريق', 'الإقليم الشرقي', 'إقليم النيل الأزرق'],
-        correct: 'إقليم دارفور العريق',
-        reward: 15
-      }
-    },
-    {
-      id: 'dinder',
-      name: 'محمية الدندر الطبيعية 🐆🌳',
-      location: 'ولاية سنار (شرق السودان)',
-      emoji: '🐆',
-      summary: 'أكبر وأعرق محمية طبيعية للحياة البرية في شرق إفريقيا، تحتوي على غابات شاسعة وبحيرات عذبة ومئات الأنواع من الحيوانات النادرة كالغزلان والفهود! 🦌🦁',
-      details: 'تأسست محمية الدندر عام 1935، وتمر بها هجرات الطيور والحيوانات البرية من مختلف أنحاء العالم، وتعتبر كنزاً بيئياً مذهلاً يوضح تنوع وجمال البيئة السودانية الساحرة.',
-      quiz: {
-        question: 'ما هي أهمية محمية الدندر في السودان؟',
-        options: ['مصنع للسيارات الحديثة', 'أكبر محمية طبيعية للحياة البرية والغابات', 'مركز لعلوم الفضاء والنجوم'],
-        correct: 'أكبر محمية طبيعية للحياة البرية والغابات',
-        reward: 15
-      }
-    },
-    {
-      id: 'portsudan',
-      name: 'بحر بورتسودان المرجاني 🐠🌊',
-      location: 'ولاية البحر الأحمر',
-      emoji: '🐠',
-      summary: 'أجمل شواطئ البحر الأحمر النقية، المشهورة بأعجب الشعب المرجانية الملونة في العالم، وهي مقصد للغواصين وموطن للدلافين والأسماك النادرة! 🐬🐙',
-      details: 'تتميز مياه البحر الأحمر السودانية بنقائها الشديد ومحافظتها على طبيعتها العذراء البعيدة عن التلوث، وبها جزيرة سنقنيب ومنارة سواكن الشهيرة.',
-      quiz: {
-        question: 'ما الذي يشتهر به بحر بورتسودان الساحر عالمياً؟',
-        options: ['الشعاب المرجانية الملونة والنقية وحياة البحر العذراء', 'كثرة الثلوج والجليد المتراكم', 'صناعة القوارب الورقية'],
-        correct: 'الشعاب المرجانية الملونة والنقية وحياة البحر العذراء',
-        reward: 15
-      }
-    },
+  const [landmarks] = useState([
+    ...SUDAN_LANDMARKS,
     {
       id: 'suakin',
       name: 'سواكن التاريخية (بوابة الشرق) 🏰🌊',
@@ -117,7 +54,7 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
         reward: 15
       }
     }
-  ];
+  ]);
 
   // Sudan Traditional tools (الادوات التراثية السودانية المستعملة)
   const tools = [
@@ -226,13 +163,7 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
     : tools.find(item => item.id === selectedItemId);
 
   const pronounceText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    }
+    speak(text);
   };
 
   const handleQuizAnswer = (option: string) => {
@@ -241,10 +172,14 @@ export default function SudanExplore({ addStars }: SudanExploreProps) {
 
     if (option === currentItem.quiz.correct) {
       addStars(currentItem.quiz.reward);
+      playCorrect();
+      playStarSound();
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
       setAnsweredQuizList(prev => [...prev, currentItem.id]);
       setQuizFeedback(`إجابة صحيحة مذهلة ومتقنة! كسبت ${currentItem.quiz.reward} نجمة ذهبية في أكاديمية نقلة! ⭐🎉`);
       pronounceText("يا سلام عليك يا بطل! إجابة صحيحة ممتازة!");
     } else {
+      playWrong();
       setQuizFeedback('حاول مجدداً يا بطل، اقرأ التفاصيل بالأعلى وستعرف الحل بالتأكيد! ✨🔍');
       pronounceText("أوه! حاول مرة أخرى يا ذكي!");
     }

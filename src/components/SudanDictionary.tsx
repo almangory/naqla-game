@@ -20,6 +20,10 @@ import {
   GraduationCap
 } from 'lucide-react';
 
+import { useSpeech } from '../hooks/useSpeech';
+import { useSoundEffects } from '../hooks/useSoundEffects';
+import confetti from 'canvas-confetti';
+
 interface SudanDictionaryProps {
   addStars: (amount: number) => void;
   onBackToMain?: () => void; // Support back navigation inside app
@@ -38,6 +42,8 @@ interface DictionaryItem {
 }
 
 export default function SudanDictionary({ addStars, onBackToMain }: SudanDictionaryProps) {
+  const { speak } = useSpeech();
+  const { playClick, playCorrect, playWrong, playStarSound } = useSoundEffects();
   const dictionaryItems: DictionaryItem[] = [
     {
       id: 'tebaldi',
@@ -176,14 +182,8 @@ export default function SudanDictionary({ addStars, onBackToMain }: SudanDiction
   const [quizFeedback, setQuizFeedback] = useState<string>('');
 
   // Native Speech Synthesis
-  const playSpeech = (text: string, lang: 'ar-SA' | 'en-US') => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.rate = lang === 'en-US' ? 0.9 : 0.85; // slightly slower for kids
-      window.speechSynthesis.speak(utterance);
-    }
+  const playSpeech = (text: string, lang: 'ar-SA' | 'en-US' = 'ar-SA') => {
+    speak(text, lang);
   };
 
   const filteredItems = dictionaryItems.filter(item => {
@@ -237,10 +237,14 @@ export default function SudanDictionary({ addStars, onBackToMain }: SudanDiction
     const currentItem = dictionaryItems[currentQuizIndex];
     if (answer === currentItem.english) {
       setQuizScore(prev => prev + 1);
+      playCorrect();
+      playStarSound();
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
       setQuizFeedback(`إجابة رائعة وصحيحة! بطل حقيقي! 🌟 ${currentItem.arabic} باللغة الإنجليزية هي فعلاً: "${currentItem.english}"! 🎉`);
       addStars(10);
       playSpeech("رائع جداً!", 'ar-SA');
     } else {
+      playWrong();
       setQuizFeedback(`أوه! الإجابة الصحيحة لـ "${currentItem.arabic}" هي "${currentItem.english}". لا تقلق يا بطل، ستتعلمها وتفوز في السؤال القادم! 💪⭐`);
       playSpeech("حاول ثانية يا بطل", 'ar-SA');
     }
