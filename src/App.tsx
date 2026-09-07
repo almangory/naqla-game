@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { 
@@ -24,10 +24,17 @@ import {
   Home, 
   Compass,
   X,
-  Play
+  Play,
+  Lock,
+  ShieldCheck,
+  RotateCcw,
+  Check,
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { GameCategory, UserStats } from './types';
 import { useSoundEffects } from './hooks/useSoundEffects';
+import { useSpeech } from './hooks/useSpeech';
 import { MobileBottomDock, MobileNavSection } from './components/MobileBottomDock';
 import { MobileStoriesBar } from './components/MobileStoriesBar';
 
@@ -106,7 +113,8 @@ const AVAILABLE_STICKERS = [
 ];
 
 export default function App() {
-  const { isMuted, toggleMute, playClick, playStarSound, playLevelUp } = useSoundEffects();
+  const { isMuted, toggleMute, playClick, playStarSound, playLevelUp, playCorrect, playWrong } = useSoundEffects();
+  const { speak } = useSpeech();
 
   const [activeTab, setActiveTab] = useState<GameCategory>('home');
   const [mobileNavSection, setMobileNavSection] = useState<MobileNavSection>('home');
@@ -163,7 +171,87 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
   const [showIosInstallGuide, setShowIosInstallGuide] = useState<boolean>(false);
+  // 🔐 Exit Security Gate State (Parental Lock on App Exit)
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
+  const [exitSecurityCode, setExitSecurityCode] = useState<string>('5824');
+  const [enteredExitCode, setEnteredExitCode] = useState<string>('');
+  const [exitCodeError, setExitCodeError] = useState<string>('');
+  const [isAppExited, setIsAppExited] = useState<boolean>(false);
+
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
+
+  const mobileNavSectionRef = useRef(mobileNavSection);
+  mobileNavSectionRef.current = mobileNavSection;
+
+  const showExitModalRef = useRef(showExitModal);
+  showExitModalRef.current = showExitModal;
+
+  const showConfirmModalRef = useRef(showConfirmModal);
+  showConfirmModalRef.current = showConfirmModal;
+
+  const showIosInstallGuideRef = useRef(showIosInstallGuide);
+  showIosInstallGuideRef.current = showIosInstallGuide;
+
+  const isNavigatingViaPopstateRef = useRef(false);
+
+  const generateRandomExitCode = useCallback(() => {
+    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+    setExitSecurityCode(randomCode);
+    setEnteredExitCode('');
+    setExitCodeError('');
+    return randomCode;
+  }, []);
+
+  const pronounceExitCode = useCallback(() => {
+    if (exitSecurityCode) {
+      const digits = exitSecurityCode.split('').join(' ، ');
+      speak(`إذا أردت الخروج أدخل الرمز أدناه: ${digits}`);
+    }
+  }, [exitSecurityCode, speak]);
+
+  const handleKeypadPress = (digit: string) => {
+    playClick();
+    setExitCodeError('');
+    if (enteredExitCode.length < 4) {
+      setEnteredExitCode(prev => prev + digit);
+    }
+  };
+
+  const handleKeypadBackspace = () => {
+    playClick();
+    setExitCodeError('');
+    setEnteredExitCode(prev => prev.slice(0, -1));
+  };
+
+  const handleKeypadClear = () => {
+    playClick();
+    setExitCodeError('');
+    setEnteredExitCode('');
+  };
+
+  const handleCancelExit = () => {
+    playClick();
+    setShowExitModal(false);
+    setEnteredExitCode('');
+    setExitCodeError('');
+  };
+
+  const handleConfirmExit = () => {
+    if (enteredExitCode.trim() !== exitSecurityCode.trim()) {
+      playWrong();
+      setExitCodeError(`⚠️ الرمز غير صحيح! يرجى إدخال الرمز (${exitSecurityCode}) المطلوب للتأكيد.`);
+      return;
+    }
+
+    // Code is correct!
+    playCorrect();
+    setShowExitModal(false);
+    setIsAppExited(true);
+    try {
+      window.close();
+    } catch (e) {}
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -211,44 +299,134 @@ export default function App() {
     }
   };
 
-  // Sync browser history with activeTab for mobile hardware & gesture back button
+  // 1. Establish history anchor on mount so hardware back button CANNOT leave the web app
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (activeTab !== 'home') {
-      if (window.location.hash !== '#' + activeTab) {
-        window.history.pushState({ tab: activeTab }, '', '#' + activeTab);
-      }
-    } else {
-      if (window.location.hash) {
-        window.history.replaceState({ tab: 'home' }, '', window.location.pathname);
-      }
-    }
-  }, [activeTab]);
+    try {
+      window.history.replaceState(
+        { appGuard: 'root', tab: 'home', section: 'home' },
+        '',
+        window.location.pathname
+      );
+      window.history.pushState(
+        { appGuard: 'active', tab: activeTab, section: mobileNavSection },
+        '',
+        activeTab !== 'home' ? '#' + activeTab : window.location.pathname
+      );
+    } catch (e) {}
+  }, []);
 
+  // 2. Push history states when user navigates forward in the app
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (!window.history.state) {
-      window.history.replaceState({ tab: 'home' }, '', window.location.pathname);
+    if (isNavigatingViaPopstateRef.current) {
+      isNavigatingViaPopstateRef.current = false;
+      return;
     }
+
+    const currentState = window.history.state;
+    if (
+      currentState?.tab !== activeTab ||
+      currentState?.section !== mobileNavSection
+    ) {
+      const hash = activeTab !== 'home' ? '#' + activeTab : '';
+      const url = hash ? window.location.pathname + hash : window.location.pathname;
+      try {
+        window.history.pushState(
+          { appGuard: 'active', tab: activeTab, section: mobileNavSection },
+          '',
+          url
+        );
+      } catch (e) {}
+    }
+  }, [activeTab, mobileNavSection]);
+
+  // 3. Intercept and handle device / gesture Back button (popstate)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
     const handlePopState = (e: PopStateEvent) => {
-      if (activeTab !== 'home') {
-        // User pressed phone back button while in a game -> smoothly return to home!
-        setActiveTab('home');
-      } else {
-        // User pressed phone back button while already on home -> Show exit confirmation!
-        window.history.pushState({ tab: 'home' }, '', window.location.pathname);
-        setShowExitModal(true);
+      // 1. If Exit Security Modal is open -> dismiss modal & keep user safe in app
+      if (showExitModalRef.current) {
+        setShowExitModal(false);
+        setEnteredExitCode('');
+        setExitCodeError('');
+        try {
+          window.history.pushState(
+            { appGuard: 'active', tab: 'home', section: mobileNavSectionRef.current },
+            '',
+            window.location.pathname
+          );
+        } catch (err) {}
+        return;
       }
+
+      // 2. If Confirm Modal is open -> dismiss it
+      if (showConfirmModalRef.current) {
+        setShowConfirmModal(false);
+        try {
+          window.history.pushState(
+            { appGuard: 'active', tab: activeTabRef.current, section: mobileNavSectionRef.current },
+            '',
+            window.location.pathname
+          );
+        } catch (err) {}
+        return;
+      }
+
+      // 3. If iOS Guide is open -> dismiss it
+      if (showIosInstallGuideRef.current) {
+        setShowIosInstallGuide(false);
+        try {
+          window.history.pushState(
+            { appGuard: 'active', tab: activeTabRef.current, section: mobileNavSectionRef.current },
+            '',
+            window.location.pathname
+          );
+        } catch (err) {}
+        return;
+      }
+
+      // 4. If inside a game (activeTab !== 'home') -> return to previous section/home within the site!
+      if (activeTabRef.current !== 'home') {
+        isNavigatingViaPopstateRef.current = true;
+        setActiveTab('home');
+        if (e.state?.section) {
+          setMobileNavSection(e.state.section);
+        }
+        return;
+      }
+
+      // 5. If in a mobile sub-section ('games', 'store', 'rewards', 'settings') -> return to 'home' section!
+      if (mobileNavSectionRef.current !== 'home') {
+        isNavigatingViaPopstateRef.current = true;
+        setMobileNavSection('home');
+        return;
+      }
+
+      // 6. User is at true root (activeTab === 'home' AND mobileNavSection === 'home')
+      // Attempting to exit the site!
+      // NEVER allow unconfirmed exit! Re-push active state immediately:
+      try {
+        window.history.pushState(
+          { appGuard: 'active', tab: 'home', section: 'home' },
+          '',
+          window.location.pathname
+        );
+      } catch (err) {}
+
+      // Open the Exit Verification Gate Modal with the security code!
+      generateRandomExitCode();
+      setShowExitModal(true);
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [activeTab]);
+  }, [generateRandomExitCode]);
 
   // Initialize stats with Safe Storage fallback
   const [stats, setStats] = useState<UserStats>(() => {
@@ -662,6 +840,44 @@ export default function App() {
 
   const currentBgColor = BG_COLORS.find(c => c.id === bgColor)?.value || '#D6D5F2';
   const isHexTheme = bgColor === 'lavender_3d' || bgColor === 'magic_spark';
+
+  if (isAppExited) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 flex items-center justify-center p-4 text-center text-white" dir="rtl">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="bg-white/10 backdrop-blur-xl rounded-[36px] border-4 border-purple-400/40 p-8 sm:p-12 max-w-md w-full shadow-2xl space-y-6"
+        >
+          <div className="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-orange-500 p-1 shadow-lg flex items-center justify-center text-5xl animate-bounce">
+            👋🌟
+          </div>
+          
+          <h2 className="text-2xl sm:text-3xl font-black text-amber-300">
+            تم تسجيل الخروج بنجاح!
+          </h2>
+          
+          <p className="text-sm sm:text-base font-bold text-purple-100 leading-relaxed">
+            شكراً لك على وقتك الرائع في أكاديمية نقلة للأطفال! كل إنجازاتك ونجومك ⭐ محفوظة بأمان تام، وننتظر عودتك بشوق في أي وقت! 🦉
+          </p>
+
+          <div className="pt-2">
+            <button
+              onClick={() => {
+                setIsAppExited(false);
+                setActiveTab('home');
+                setMobileNavSection('home');
+              }}
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-base rounded-2xl border-3 border-emerald-700 shadow-[0_5px_0_0_#065F46] active:translate-y-1 active:shadow-none transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>🎮</span>
+              <span>العودة واللعب مجدداً</span>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -1720,7 +1936,7 @@ export default function App() {
           </div>
         )}
         {/* ========================================================================= */}
-        {/* 6. APP EXIT CONFIRMATION MODAL (FOR MOBILE HARDWARE & GESTURE BACK)       */}
+        {/* 6. APP EXIT CONFIRMATION SECURITY GATE (PARENTAL CODE VERIFICATION)       */}
         {/* ========================================================================= */}
         {showExitModal && (
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4" id="app-exit-modal">
@@ -1728,7 +1944,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.6 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowExitModal(false)}
+              onClick={handleCancelExit}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
             
@@ -1736,44 +1952,146 @@ export default function App() {
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              className="bg-white rounded-[32px] border-4 border-[#6C5CE7] shadow-[0_12px_0_0_#4A3CB5] p-6 sm:p-8 max-w-md w-full relative z-50 text-center"
+              className="bg-white rounded-[32px] border-4 border-[#6C5CE7] shadow-[0_12px_0_0_#4A3CB5] p-5 sm:p-7 max-w-md w-full relative z-50 text-center"
             >
-              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl border-3 border-purple-300 overflow-hidden shadow-lg p-1 bg-gradient-to-tr from-purple-100 to-indigo-50">
-                <img src="/favicon.png" alt="Naqla Games" className="w-full h-full object-cover rounded-xl" />
+              {/* Header Icon & Logo */}
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border-3 border-purple-300 overflow-hidden shadow-md p-1 bg-gradient-to-tr from-purple-100 to-indigo-50 shrink-0">
+                  <img src="/favicon.png" alt="Naqla Games" className="w-full h-full object-cover rounded-xl" />
+                </div>
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border-3 border-amber-300 bg-amber-50 text-amber-600 shadow-md flex items-center justify-center text-3xl shrink-0 select-none">
+                  🔐
+                </div>
               </div>
 
-              <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-2 leading-relaxed">
-                هل أنت متأكد من الخروج من تطبيق ألعاب نقلة؟ 🎮👋
+              <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-1 leading-snug">
+                تأكيد الخروج من تطبيق ألعاب نقلة 🚪
               </h3>
               
-              <p className="text-xs sm:text-sm font-bold text-gray-600 mb-6">
-                سنشتاق إليك كثيراً! كل ألعابك وإنجازاتك ونجومك ⭐ محفوظة وجاهزة دائماً لعودتك في أي وقت!
+              <p className="text-xs font-bold text-gray-500 mb-2">
+                لحماية الأطفال ومنع الخروج بالخطأ، يرجى إدخال رمز التحقق:
               </p>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowExitModal(false);
-                    // Try closing the tab/app or navigate back
-                    if (window.history.length > 1) {
-                      window.history.go(-2);
-                    } else {
-                      window.close();
-                    }
+
+              {/* The User-Requested Explicit Message Banner */}
+              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-2.5 text-amber-950 font-black text-sm sm:text-base text-center my-2 shadow-xs flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>إذا أردت الخروج أدخل الرمز أدناه</span>
+              </div>
+
+              {/* Security Code Display Badges */}
+              <div className="flex items-center justify-center gap-2 my-2.5">
+                {exitSecurityCode.split('').map((char, idx) => (
+                  <div
+                    key={idx}
+                    className="w-11 h-13 sm:w-13 sm:h-15 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-mono text-2xl sm:text-3xl font-black flex items-center justify-center shadow-[0_4px_0_0_#3730A3] border-2 border-purple-300 select-none tracking-widest"
+                  >
+                    {char}
+                  </div>
+                ))}
+
+                <div className="flex flex-col gap-1 mr-1">
+                  <button
+                    type="button"
+                    onClick={pronounceExitCode}
+                    className="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer active:scale-95 shadow-xs"
+                    title="استمع لنطق الرمز 🔊"
+                  >
+                    <Volume2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={generateRandomExitCode}
+                    className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition cursor-pointer active:scale-95 shadow-xs"
+                    title="توليد رمز جديد 🔄"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Input Display Box */}
+              <div className="my-2 max-w-[260px] mx-auto">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={enteredExitCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setEnteredExitCode(val);
+                    setExitCodeError('');
                   }}
+                  placeholder="أدخل الرمز هنا..."
+                  className="w-full text-center tracking-[0.5em] text-2xl font-black py-2 px-3 rounded-2xl border-3 border-indigo-200 bg-indigo-50/50 text-indigo-950 outline-none focus:border-indigo-500 focus:bg-white shadow-inner font-mono transition"
+                />
+              </div>
+
+              {/* Tactile On-Screen Numeric Keypad (For Phone Touch Screens) */}
+              <div className="grid grid-cols-3 gap-1.5 max-w-[220px] mx-auto my-2">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+                  <button
+                    key={digit}
+                    type="button"
+                    onClick={() => handleKeypadPress(digit)}
+                    className="h-9 rounded-xl bg-gray-100 hover:bg-indigo-100 text-gray-800 font-mono font-black text-base border border-gray-300 active:scale-95 transition cursor-pointer shadow-xs"
+                  >
+                    {digit}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleKeypadClear}
+                  className="h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-[11px] border border-rose-200 active:scale-95 transition cursor-pointer"
+                >
+                  مسح
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleKeypadPress('0')}
+                  className="h-9 rounded-xl bg-gray-100 hover:bg-indigo-100 text-gray-800 font-mono font-black text-base border border-gray-300 active:scale-95 transition cursor-pointer shadow-xs"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={handleKeypadBackspace}
+                  className="h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-black text-sm border border-amber-200 active:scale-95 transition cursor-pointer flex items-center justify-center"
+                >
+                  ⌫
+                </button>
+              </div>
+
+              {/* Error Alert (if code was wrong) */}
+              {exitCodeError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black mb-3 flex items-center justify-center gap-1.5"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{exitCodeError}</span>
+                </motion.div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-2.5 mt-3">
+                <button
+                  type="button"
+                  onClick={handleConfirmExit}
                   className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black text-xs sm:text-sm rounded-2xl border-3 border-red-700 shadow-[0_4px_0_0_#991B1B] active:translate-y-1 active:shadow-none transition cursor-pointer flex items-center justify-center gap-1.5"
                   id="exit-modal-confirm"
                 >
                   <span>🚪</span>
-                  <span>نعم، خروج من التطبيق</span>
+                  <span>تأكيد الخروج</span>
                 </button>
                 <button
-                  onClick={() => setShowExitModal(false)}
+                  type="button"
+                  onClick={handleCancelExit}
                   className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-2xl border-3 border-emerald-700 shadow-[0_4px_0_0_#065F46] active:translate-y-1 active:shadow-none transition cursor-pointer flex items-center justify-center gap-1.5"
                   id="exit-modal-stay"
                 >
                   <span>🎮</span>
-                  <span>البقاء واللعب!</span>
+                  <span>البقاء والاستمرار!</span>
                 </button>
               </div>
             </motion.div>
